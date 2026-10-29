@@ -8,3 +8,12 @@ html,body{height:100%;width:100%;overflow:hidden;overscroll-behavior:none;touch-
 
 /* Keep the published build visible beside the journal title on phones. */
 #modal-title .game-version{display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 7px;border:1px solid #75845677;border-radius:4px;color:#b8c5a9;font:10px/1.4 monospace;letter-spacing:.3px;white-space:nowrap}
+
+/* Fit complete cover cards into the safe area with one uniform scale. */
+.screen-cover{padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);min-height:0;min-width:0;justify-content:center;overflow:hidden}
+.screen-cover>div{flex-shrink:0;min-width:0;max-width:100%;max-height:none;margin:0;overflow:visible;transform:scale(var(--panel-scale,1));transform-origin:center}
+.screen-cover button{touch-action:manipulation}
+.modal-backdrop{padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l)}
+#modal{max-height:100%;min-height:0;min-width:0}
+.modal-header{flex-shrink:0}
+#modal-body{min-height:0}

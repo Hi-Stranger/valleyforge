@@ -36,6 +36,7 @@
     "game/meadow-fish.mjs",
     "game/meadow-ripples.mjs",
     "game/mobile.css",
+    "game/panel-fit.mjs",
     "game/skills.css",
     "game/stream-flow.mjs",
     "game/style.css",

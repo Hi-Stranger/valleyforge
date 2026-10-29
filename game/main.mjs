@@ -1,4 +1,5 @@
 import {mountFullscreen} from './fullscreen.mjs';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.10.30.2';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
 import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs';
 import {createSwordVfx} from './sword-vfx.mjs';
@@ -13,7 +14,7 @@ const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.29.4';
+const GAME_VERSION='2026.10.30.2';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -419,4 +420,5 @@ async function load(){try{const res=await fetch('./game/assets/'+(MEADOW?'meadow
     if(MINE){mineAtlas=await loadImage('./game/assets/mine-tiles.png');Object.assign(gateway,world.entry);Object.assign(respawn,world.entry);for(const name of ['golem','wolf']){const im=await loadImage('./game/assets/mine-'+name+'.png');const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const cc=c.getContext('2d');cc.drawImage(im,0,0);const data=cc.getImageData(0,0,c.width,c.height).data;let l=c.width,t=c.height,r=0,b=0;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(data[(y*c.width+x)*4+3]>64){l=Math.min(l,x);t=Math.min(t,y);r=Math.max(r,x);b=Math.max(b,y);}mineSprites[name]={im,x:l,y:t,w:r-l+1,h:b-t+1};}}buildCollision();Object.assign(player,findFree(FIELD?respawn.x:state.position?.x??respawn.x,FIELD?respawn.y:state.position?.y??respawn.y,player.r));spawnWorld();bind();bindTouch();resize();phase=state.started?'playing':'ready';$('#intro').hidden=state.started;$('#loading').hidden=true;renderUI();qaSetup();requestAnimationFrame(loop);
   }catch(error){console.error(error);$('#loading-text').textContent=error.message;$('#reload-btn').hidden=false;$('#reload-btn').onclick=()=>location.reload();}}
 function loop(t){if(document.hidden){last=t;requestAnimationFrame(loop);return;}const dt=Math.min(.035,(t-last)/1000||.016);last=t;if(!orientationBlocked){if(phase==='entering')updateEntering(dt);else if(phase==='playing'&&(!modal||(modal==='map'&&mode==='exploration')))update(dt);}if(modal==='map'&&mode==='exploration'){const dot=$('.map-full .map-point');if(dot){dot.style.left=player.x/world.width*100+'%';dot.style.top=player.y/world.height*100+'%';}}render();requestAnimationFrame(loop);}
+mountPanelFit();
 load();
