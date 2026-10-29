@@ -1,5 +1,5 @@
 import {mountFullscreen} from './fullscreen.mjs';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.10.30.2';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.10.30.4';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
 import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs';
 import {createSwordVfx} from './sword-vfx.mjs';
@@ -14,7 +14,7 @@ const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.2';
+const GAME_VERSION='2026.10.30.4';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -214,7 +214,7 @@ function update(dt){time+=dt;state.playtime+=dt;player.invuln=Math.max(0,player.
     if(swing.time<=0)swing=null;}
   if(mode==='exploration')for(const n of nodes)if(n.respawn>0)n.respawn=Math.max(0,n.respawn-dt);
   for(const e of enemies){e.hit=Math.max(0,e.hit-dt);e.stun=Math.max(0,e.stun-dt);e.cooldown-=dt;e.attackAnim=Math.max(0,e.attackAnim-dt);const dist=distance(e,player);e.moving=false;
-    if(e.boar){updateBoarKing(e,dt,{player,move,findFree,damage:hurtPlayer,random:bossRandom||Math.random,emit:(kind,boss)=>{if(kind==='stomp'||kind==='pounceImpact'||kind==='chargeImpact'){sparks(boss.x,boss.y,'#d6bc87',kind==='stomp'?8:20);screenShake=kind==='stomp'?2:5;sound(kind==='stomp'?100:80,.12,'triangle');}else if(kind==='roarImpact'){sound(85,.3,'sawtooth',.035);screenShake=3;}else if(['roar','pounce','chargeWindup'].includes(kind))float(BOAR_ACTIONS[kind],boss.x,boss.y-100,'#f3d395');}});if(phase!=='playing')return;continue;}
+    if(e.boar){updateBoarKing(e,dt,{player,move,findFree,damage:hurtPlayer,random:bossRandom||Math.random,emit:(kind,boss)=>{if(kind==='stomp'||kind==='pounceImpact'||kind==='chargeImpact'){sparks(boss.x,boss.y,'#d6bc87',kind==='stomp'?8:20);screenShake=kind==='stomp'?2:5;sound(kind==='stomp'?100:80,.12,'triangle');}else if(kind==='roarImpact'){sound(85,.3,'sawtooth',.035);screenShake=3;}else if(['roar','pounce','chargeWindup'].includes(kind))float(BOAR_ACTIONS[kind],boss.x,boss.y+23,'#f3d395');}});if(phase!=='playing')return;continue;}
     if(e.windup>0){e.windup-=dt;if(e.windup<=0){e.attackAnim=.35;e.cooldown=e.type==='boss'?1.4:1.2;if(dist<e.range+player.r+12&&!safeZone())hurtPlayer(e.attack);if(e.type==='boss')sparks(e.x,e.y,'#d6ab75',24);}continue;}
     if(e.stun>0)continue;
     const chase=mode==='battle';
@@ -252,7 +252,8 @@ function terrainView(){return {x:camera.x,y:camera.y,width:screenW/zoom,height:s
 function drawMeadowTerrain(){const view=terrainView();drawTerrainTiles(ctx,meadowAtlas,world,view);meadowRipples?.draw(ctx,time,view);meadowFish?.draw(ctx,time,view);for(const o of world.groundObjects)sceneObject(o);}
 function drawMineTiles(){drawTerrainTiles(ctx,mineAtlas,world,terrainView());for(const o of world.groundObjects)sceneObject(o);}
 function drawMineCreature(e){if(!MINE)return false;const sprite=mineSprites[e.type==='boar'?'wolf':'golem'];if(!sprite)return false;const h=e.type==='boss'?165:e.type==='elite'?95:e.type==='boar'?55:62,w=h*sprite.w/sprite.h;const bob=e.moving?Math.sin(time*8+e.id)*1.5:Math.sin(time*2+e.id)*.4;ctx.save();ctx.translate(e.x,e.y);if(Math.cos(e.angle)<-.65)ctx.scale(-1,1);if(e.attackAnim>0)ctx.rotate(Math.sin(e.attackAnim*9)*.08);ctx.drawImage(sprite.im,sprite.x,sprite.y,sprite.w,sprite.h,-w/2,-h+bob,w,h);ctx.restore();return true;}
-function drawBoarKing(e,exploration=false){shadow(e.x,e.y,Math.max(16,35-(e.boar?.height||0)*.2));boarKingArt.draw(ctx,e,time,exploration);worldText(e.name,e.x,e.y-(exploration?113:101)-(e.boar?.height||0),'#f2cd8d',9);if(exploration){if(distance(e,player)<150)worldText('靠近进入首领战',e.x,e.y+19,'#e7c99d',8);}else if(e.boar.action==='recover')worldText('收势 · 可以反击',e.x,e.y+23,'#bce4c7',8);}
+function drawBoarKing(e,exploration=false){shadow(e.x,e.y,Math.max(16,35-(e.boar?.height||0)*.2));boarKingArt.draw(ctx,e,time,exploration);if(exploration){worldText(e.name,e.x,e.y-113,'#f2cd8d',9);if(distance(e,player)<150)worldText('靠近进入首领战',e.x,e.y+19,'#e7c99d',8);}else if(e.boar.action==='recover')worldText('收势 · 可以反击',e.x,e.y+23,'#bce4c7',8);}
+function positionBossBar(){const bar=$('#boss-bar'),boss=mode==='battle'&&enemies.find(e=>e.boar);if(!boss){bar.hidden=true;return;}const transform=ctx.getTransform(),x=boss.x*transform.a+boss.y*transform.c+transform.e,y=boss.x*transform.b+(boss.y-(boss.boar.height||0)-101)*transform.d+transform.f+13;bar.hidden=x<-80||x>screenW+80||y<-160||y>screenH+80;if(bar.hidden)return;const half=bar.offsetWidth/2,height=bar.offsetHeight;bar.style.left=(canvas.offsetLeft+clamp(x,half+6,screenW-half-6))+'px';bar.style.top=(canvas.offsetTop+clamp(y,height+6,screenH-6))+'px';}
 function drawEnemy(e){if(e.boar){drawBoarKing(e);return;}shadow(e.x,e.y,e.r);if(e.windup>0){let progress=1-e.windup/e.delay;ctx.save();ctx.fillStyle=`rgba(194,70,43,${.1+progress*.22})`;ctx.strokeStyle='#df9470';ctx.lineWidth=1;ctx.beginPath();if(e.type==='boss'){ctx.arc(e.x,e.y,e.range+8,0,Math.PI*2);}else{ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,e.range+12,e.angle-.7,e.angle+.7);}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
   const a=e.attackAnim||e.windup?'attack':e.moving?'walk':'idle',dir=Math.abs(Math.cos(e.angle))>.65?'right':Math.sin(e.angle)>0?'down':'up';let clip=e.type==='skeleton'?`skeleton.${a}.${dir}`:e.type==='boar'?'boar.walk':`${e.type}.${a}`;
   if(MEADOW)drawMeadowActor(e.type,e.x,e.y,Math.cos(e.angle)<-.65,e.moving||e.type==='slime');else if(!drawMineCreature(e))drawClip(clip,e.x,e.y,e.scale*(ACTOR_SCALE[e.type]||1),Math.cos(e.angle)<-.65,e.type==='boar'?5:8);
@@ -297,7 +298,7 @@ function render(){if(!world)return;const stamp=performance.now(),frozen=orientat
   sorted.sort((a,b)=>a.depth-b.depth);for(const o of sorted)o.draw();drawSwordEffects();
   for(const p of particles){ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,2,2);}for(const n of numbers){ctx.globalAlpha=Math.min(1,n.life*2);worldText(n.text,n.x,n.y,n.color,10);}ctx.globalAlpha=1;
   const goal=objective();if(goal){const dx=goal.x-player.x,dy=goal.y-player.y;if(Math.hypot(dx,dy)>(battle?Math.min(115,screenW/zoom*.4):220)){const a=Math.atan2(dy,dx),r=Math.min(screenW/zoom*.36,screenH/zoom*.32),x=player.x+Math.cos(a)*r,y=player.y+Math.sin(a)*r;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle='#e3c384';ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-4,-4);ctx.lineTo(-4,4);ctx.closePath();ctx.fill();ctx.restore();worldText(goal.label||'铁匠铺',x,y+14,'#e5cd95',8);}}
-  ctx.setTransform(1,0,0,1,0,0);
+  positionBossBar();ctx.setTransform(1,0,0,1,0,0);
   renderCharacterPreview(stamp);
   // The phone UI hides this minimap. Render it only when a future layout exposes it.
   if($('#map-btn').offsetParent!==null){
@@ -328,7 +329,7 @@ function renderHUD(){const st=stats(state);$('#hp-fill').style.width=clamp(state
   $('.world-hint').textContent=mode==='battle'?'WASD 移动 · 左键 / J 攻击 · 空格闪避':'点击地图移动 · 靠近怪物遇敌 · E 采集';
   $('#return-btn').innerHTML=mode==='battle'?'↟ 撤离战斗 <kbd>R</kbd>':'↟ 返回原野入口 <kbd>R</kbd>';
   $('#map-btn span').innerHTML=mode==='battle'?'战斗场地 <kbd>M</kbd>':(MEADOW?'溪畔原野 <kbd>M</kbd>':MINE?'废矿深窟 <kbd>M</kbd>':'澄镜溪谷 <kbd>M</kbd>');
-  const boss=enemies.find(e=>e.type==='boss');$('#boss-bar').hidden=!boss;document.body.classList.toggle('has-boss',!!boss);if(boss){$('#boss-bar b').textContent=boss.name;$('#boss-hp').textContent=`${Math.ceil(boss.hp)} / ${boss.maxHp}`;$('#boss-health-fill').style.width=clamp(boss.hp/boss.maxHp*100,0,100)+'%';const rage=boss.boar?.rage||0;$('#boss-rage-fill').style.width=rage+'%';$('#boss-rage-label').textContent=`怒气 ${Math.floor(rage)} / 100`;$('#boss-rage').setAttribute('aria-valuenow',Math.floor(rage));$('#boss-bar').classList.toggle('enraged',rage>=100);$('#boss-action').textContent=BOAR_ACTIONS[boss.boar?.action]||'首领战';}
+  const boss=enemies.find(e=>e.type==='boss');$('#boss-bar').hidden=!boss;document.body.classList.toggle('has-boss',!!boss);if(boss){$('#boss-hp').textContent=`${Math.ceil(boss.hp)} / ${boss.maxHp}`;$('#boss-health-fill').style.width=clamp(boss.hp/boss.maxHp*100,0,100)+'%';const rage=boss.boar?.rage||0;$('#boss-rage-fill').style.width=rage+'%';$('#boss-rage-label').textContent=`怒气 ${Math.floor(rage)} / 100`;$('#boss-rage').setAttribute('aria-valuenow',Math.floor(rage));$('#boss-bar').classList.toggle('enraged',rage>=100);$('#boss-action').textContent=BOAR_ACTIONS[boss.boar?.action]||'首领战';}
   $('#channel-bar').hidden=channel<=0;$('#channel-bar span').textContent=mode==='battle'?'撤离战斗…':'返回原野入口…';$('#channel-bar i').style.width=(1-channel/1.8)*100+'%';}
 function renderUI(){sceneDirty=true;if(!world)return;const st=stats(state),q=QUESTS[state.quest];$('#quest-number').textContent=state.quest===6?'第一章 · 完成':`委托 0${state.quest+1}`;$('#quest-title').textContent=q.title;$('#quest-desc').textContent=q.desc;$('#quest-progress').innerHTML=`<div class="quest-progress-line">${q.line}<b>${q.goal()}</b></div>`;
   $('#quest-chip-text').textContent=q.title+' · '+q.goal();
@@ -368,7 +369,7 @@ function bindTouch(){
   press($('#dodge-btn'),dodge);press($('#heavy-btn'),()=>{pointer.touchAim=true;attack(true);});press($('#potion-btn'),heal);
   const stick=$('#joystick');stick.setAttribute('aria-hidden','true');stick.removeAttribute('role');stick.removeAttribute('tabindex');
   const updateStick=e=>{const radius=stick.getBoundingClientRect().width*.34,dx=e.clientX-joystick.originX,dy=e.clientY-joystick.originY,m=Math.max(radius,Math.hypot(dx,dy));joystick.x=dx/m;joystick.y=dy/m;$('#stick-knob').style.transform=`translate(${joystick.x*radius}px,${joystick.y*radius}px)`;pointer.active=false;};
-  const covered=(x,y)=>[...document.querySelectorAll('.vitals,.zone-pill,#boss-bar,#toast-stack')].some(el=>{const r=el.getBoundingClientRect();return !el.hidden&&r.width&&r.height&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;});
+  const covered=(x,y)=>[...document.querySelectorAll('.vitals,.zone-pill,#toast-stack')].some(el=>{const r=el.getBoundingClientRect();return !el.hidden&&r.width&&r.height&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;});
   canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect();if(mode!=='battle'||e.button!==0||e.clientX>=r.left+r.width/2||covered(e.clientX,e.clientY)||joystick.id!==null||phase!=='playing'||modal||orientationBlocked)return;
     e.preventDefault();joystick.id=e.pointerId;joystick.active=true;joystick.originX=e.clientX;joystick.originY=e.clientY;joystick.x=joystick.y=0;stick.style.left=e.clientX+'px';stick.style.top=e.clientY+'px';stick.classList.add('active');canvas.setPointerCapture(e.pointerId);updateStick(e);
   });
