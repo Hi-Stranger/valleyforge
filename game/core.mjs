@@ -7,7 +7,7 @@ export const MATERIALS = {
   iron:{name:'铁矿',color:'#a6b8c6',where:'矿点、骷髅'},
   bone:{name:'骨片',color:'#d8d7c4',where:'山地骷髅'},
   crystal:{name:'晶石',color:'#b5a4e4',where:'晶矿、岩甲守卫'},
-  core:{name:'首领核心',color:'#edbd6e',where:'荒骨领主'},
+  core:{name:'首领核心',color:'#edbd6e',where:'荒牙野猪王'},
 };
 export const GEAR = {
   starter:{name:'旅人木剑',slot:'weapon',attack:6,cooldown:.43,range:47,tier:'初始',desc:'一柄可靠的旧木剑。'},

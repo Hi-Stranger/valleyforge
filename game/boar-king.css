@@ -1,0 +1,12 @@
+#boss-bar{top:calc(var(--safe-t,14px) + 3px);left:50%;right:auto;transform:translateX(-50%);width:min(410px,calc(100vw - 530px));padding:6px 10px;pointer-events:none;background:#11271ef2;z-index:5}
+#boss-bar>div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin-bottom:3px}
+#boss-bar #boss-rage{height:13px;margin-top:4px;position:relative;border:1px solid #594b2c;background:#302b21;overflow:hidden}
+#boss-bar #boss-rage-fill{display:block;height:100%;background:#df9c42;transition:none}
+#boss-bar.enraged #boss-rage-fill{background:#ed5d36}
+#boss-rage-label{position:absolute;inset:0;text-align:center;font:9px/11px monospace;color:#fff0cc;text-shadow:1px 1px #493024}
+#boss-bar .boss-tactic{display:flex;justify-content:space-between;gap:5px;color:#c4bc98;font-size:8px;line-height:12px;margin-top:3px}
+#boss-action{color:#f0d59d}
+.has-boss .zone-pill{visibility:hidden}
+.has-boss #toast-stack{top:calc(var(--safe-t,14px) + 88px)}
+@media(max-width:900px){#boss-bar{padding:4px 7px}#boss-bar .boss-tactic{font-size:7px;line-height:10px}#boss-bar>div:first-child{font-size:9px}}
+@media(max-width:680px){#boss-bar{top:calc(var(--safe-t,12px) + 58px);width:54vw}#boss-bar .boss-tactic>span:first-child{display:none}.has-boss #toast-stack{top:calc(var(--safe-t,12px) + 132px)}}
