@@ -1,3 +1,4 @@
+import {mountFullscreen} from './fullscreen.mjs';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
 import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs';
 import {createSwordVfx} from './sword-vfx.mjs';
@@ -10,7 +11,7 @@ const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.29.2';
+const GAME_VERSION='2026.10.29.3';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -370,8 +371,8 @@ function bindTouch(){
   const attackButton=$('#attack-btn');attackButton.onpointerdown=e=>{if(attackPointer!==null)return;e.preventDefault();attackPointer=e.pointerId;attackButton.setPointerCapture(e.pointerId);pointer.active=false;pointer.touchAim=true;pointer.down=true;attack();};attackButton.onpointerup=endAttackPointer;attackButton.onpointercancel=endAttackPointer;attackButton.onlostpointercapture=endAttackPointer;attackButton.onpointerleave=null;
   $('#mobile-interact').onclick=()=>mode==='battle'?returnTown():interact();
   $('#journal-btn').onclick=()=>openModal('journal');$('#quest-chip').onclick=()=>openModal('journal');$('#map-shortcut').onclick=()=>openModal('map');
-  $('#pause-sound').onclick=()=>{$('#sound-btn').click();$('#pause-sound').textContent=muted?'开启音效':'关闭音效';};$('#fullscreen-btn').hidden=!document.documentElement.requestFullscreen;
-  $('#fullscreen-btn').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen({navigationUI:'hide'});}catch{toast('可继续横屏游玩');}};
+  $('#pause-sound').onclick=()=>{$('#sound-btn').click();$('#pause-sound').textContent=muted?'开启音效':'关闭音效';};
+  mountFullscreen({onHelp:()=>{if(phase==='playing')pause();}});
   const paths={sword:'M17 2h5v5L10 19l-5-5zM3 11l10 10-2 2L1 13zM6 17l2 2-5 5H0v-3z',run:'M14 1h4v4h-4zM10 5h5l4 5h4v3h-6l-3-3-2 4 5 3 1 6h-4l-1-5-5-2-4 7H0l6-11 2-4-3 2H1V7h3z',heavy:'M10 1h4l1 9 6-6 2 3-7 6 8 1v4l-9-1-2 7H9l1-8-8 4-2-3 9-5z',potion:'M8 1h8v3h-1v5l5 5v8H4v-8l5-5V4H8z'};
   for(const [id,name] of [['attack-btn','sword'],['dodge-btn','run'],['heavy-btn','heavy'],['potion-btn','potion']])$(`#${id} .ability-symbol`).innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true" shape-rendering="crispEdges"><path d="${paths[name]}"/></svg>`;
   $('#bag-btn').innerHTML='<svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true"><path fill="currentColor" d="M8 3h8v4h4v14H4V7h4zm2 2v2h4V5zM8 11v6h8v-6z"/></svg>';

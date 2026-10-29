@@ -1,0 +1,12 @@
+{
+  "id": "./",
+  "name": "溪谷铸途 · Valleyforge",
+  "short_name": "溪谷铸途",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#101a19",
+  "theme_color": "#101a19"
+}

@@ -25,6 +25,8 @@
     "game/character-panel.mjs",
     "game/character.css",
     "game/core.mjs",
+    "game/fullscreen.css",
+    "game/fullscreen.mjs",
     "game/main.mjs",
     "game/meadow-fish.mjs",
     "game/meadow-ripples.mjs",
@@ -38,6 +40,7 @@
     "index.html",
     "licenses/Cute_Fantasy_Free.txt",
     "licenses/Mystic_Woods_Characters.txt",
-    "licenses/Mystic_Woods_Free.txt"
+    "licenses/Mystic_Woods_Free.txt",
+    "manifest.webmanifest"
   ]
 }

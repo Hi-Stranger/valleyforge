@@ -1,0 +1,9 @@
+#intro-fullscreen{display:block;margin-top:12px;min-height:36px;padding:6px 16px}
+#fullscreen-help{width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;touch-action:pan-y;overscroll-behavior:contain;background:#15231d;color:#e7e8d9;border:1px solid #a39468;padding:20px 24px;font:13px/1.8 "Microsoft YaHei",system-ui,sans-serif}
+#fullscreen-help::backdrop{background:#07110de6}
+#fullscreen-help h2{font-size:20px;line-height:1.4;margin:0 0 12px;font-weight:500}
+#fullscreen-help ol{padding-left:22px}
+#fullscreen-help li{margin:7px 0}
+#fullscreen-help .fullscreen-note{font-size:11px;color:#aab9a0}
+#fullscreen-help form{text-align:right;margin-top:14px}
+#fullscreen-help button{min-height:40px;touch-action:manipulation}
