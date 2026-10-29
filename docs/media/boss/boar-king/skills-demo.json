@@ -1,0 +1,20 @@
+{
+  "boss": "boar-king",
+  "baselineVersion": "2026.10.30.8",
+  "archivedOn": "2026-10-30",
+  "width": 960,
+  "height": 540,
+  "durationMs": 24000,
+  "sourceFps": 20,
+  "sourceFrames": 480,
+  "encodedFrames": 435,
+  "loop": "infinite",
+  "headUi": "compact-hp-and-rage-only-no-name-no-outer-panel",
+  "bytes": 2735309,
+  "sha256": "c99a48b7a81307cc0a9c23d52de11274ee7107023799069cdd182686044c08c5",
+  "displayWidths": {
+    "desktop": 120,
+    "mobile": 96
+  },
+  "demoBarWidth": 96
+}
