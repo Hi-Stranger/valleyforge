@@ -4,6 +4,7 @@ import {createSwordVfx} from './sword-vfx.mjs';
 import {mountCharacterPanel} from './character-panel.mjs';
 import {createMeadowFish} from './meadow-fish.mjs';
 import {createMeadowRipples} from './meadow-ripples.mjs';
+import {drawTerrainTiles} from './terrain-tiles.mjs';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -240,8 +241,9 @@ const ACTOR_SCALE={
   get boar(){return mode==='battle'?1:1.4;},
 };
 function drawMeadowActor(name,x,y,flip=false,animate=true){const frames=world.meadowClips[name];if(!frames)return;drawFrame(frames[animate?Math.floor(time*(name==='slime'?4:7))%frames.length:0],x,y,ACTOR_SCALE[name]||1,flip);}
-function drawMeadowTerrain(){const t=world.tileSize,x0=Math.max(0,Math.floor(camera.x/t)),y0=Math.max(0,Math.floor(camera.y/t)),x1=Math.min(world.tileCols,Math.ceil((camera.x+screenW/zoom)/t)),y1=Math.min(world.height/t,Math.ceil((camera.y+screenH/zoom)/t));for(const layer of world.tileLayers)for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const key=world.tileFrames[layer.data[y*world.tileCols+x]];drawFrame(key,x*t,y*t);}meadowRipples?.draw(ctx,time,{x:camera.x,y:camera.y,width:screenW/zoom,height:screenH/zoom});meadowFish?.draw(ctx,time,{x:camera.x,y:camera.y,width:screenW/zoom,height:screenH/zoom});for(const o of world.groundObjects)sceneObject(o);}
-function drawMineTiles(){const t=world.tileSize||32,c=world.tileCols||world.cols,r=world.height/t,x0=Math.max(0,Math.floor(camera.x/t)),y0=Math.max(0,Math.floor(camera.y/t)),x1=Math.min(c,Math.ceil((camera.x+screenW/zoom)/t)),y1=Math.min(r,Math.ceil((camera.y+screenH/zoom)/t));for(const layer of world.tileLayers)for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const gid=layer.data[y*c+x];if(!gid)continue;const f=world.atlas[world.tileFrames[gid]];ctx.drawImage(mineAtlas,f.x,f.y,f.w,f.h,x*t,y*t,t,t);}for(const o of world.groundObjects)sceneObject(o);}
+function terrainView(){return {x:camera.x,y:camera.y,width:screenW/zoom,height:screenH/zoom};}
+function drawMeadowTerrain(){const view=terrainView();drawTerrainTiles(ctx,meadowAtlas,world,view);meadowRipples?.draw(ctx,time,view);meadowFish?.draw(ctx,time,view);for(const o of world.groundObjects)sceneObject(o);}
+function drawMineTiles(){drawTerrainTiles(ctx,mineAtlas,world,terrainView());for(const o of world.groundObjects)sceneObject(o);}
 function drawMineCreature(e){if(!MINE)return false;const sprite=mineSprites[e.type==='boar'?'wolf':'golem'];if(!sprite)return false;const h=e.type==='boss'?165:e.type==='elite'?95:e.type==='boar'?55:62,w=h*sprite.w/sprite.h;const bob=e.moving?Math.sin(time*8+e.id)*1.5:Math.sin(time*2+e.id)*.4;ctx.save();ctx.translate(e.x,e.y);if(Math.cos(e.angle)<-.65)ctx.scale(-1,1);if(e.attackAnim>0)ctx.rotate(Math.sin(e.attackAnim*9)*.08);ctx.drawImage(sprite.im,sprite.x,sprite.y,sprite.w,sprite.h,-w/2,-h+bob,w,h);ctx.restore();return true;}
 function drawEnemy(e){shadow(e.x,e.y,e.r);if(e.windup>0){let progress=1-e.windup/e.delay;ctx.save();ctx.fillStyle=`rgba(194,70,43,${.1+progress*.22})`;ctx.strokeStyle='#df9470';ctx.lineWidth=1;ctx.beginPath();if(e.type==='boss'){ctx.arc(e.x,e.y,e.range+8,0,Math.PI*2);}else{ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,e.range+12,e.angle-.7,e.angle+.7);}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
   const a=e.attackAnim||e.windup?'attack':e.moving?'walk':'idle',dir=Math.abs(Math.cos(e.angle))>.65?'right':Math.sin(e.angle)>0?'down':'up';let clip=e.type==='skeleton'?`skeleton.${a}.${dir}`:e.type==='boar'?'boar.walk':`${e.type}.${a}`;

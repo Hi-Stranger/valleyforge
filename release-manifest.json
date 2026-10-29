@@ -34,6 +34,7 @@
     "game/style.css",
     "game/sword-skills.mjs",
     "game/sword-vfx.mjs",
+    "game/terrain-tiles.mjs",
     "index.html",
     "licenses/Cute_Fantasy_Free.txt",
     "licenses/Mystic_Woods_Characters.txt",
