@@ -1,0 +1,24 @@
+.ability-bar{width:255px;height:215px}
+.ability-bar .sword-skill{width:58px;height:58px;border-color:#92dbdfa8;background:#10333be8;box-shadow:inset 0 0 0 3px #27484b,2px 3px #0b1f1766}
+.ability-bar .sword-skill small{font-size:8px;position:relative;z-index:1;line-height:13px;white-space:nowrap}
+.skill-glyph{font:30px/30px Georgia,serif;color:#b1f6ff;text-shadow:0 0 6px #4cd8ff;position:relative;z-index:1}
+.skill-shade{position:absolute;bottom:0;left:0;width:100%;background:#031119bd;pointer-events:none}
+.ability-bar .skill-timer{position:absolute;inset:0;display:grid;place-items:center;color:#fff8d7;font:700 19px/1 monospace;z-index:2;text-shadow:1px 2px #000;pointer-events:none}
+.ability-bar .sword-skill:disabled{opacity:.6}
+.ability-bar .sword-skill.ready{border-color:#b3f2f0}
+.ability-bar #skill-triple{right:178px;bottom:8px;width:58px;height:58px}
+.ability-bar #skill-dash{right:151px;bottom:80px}
+.ability-bar #skill-crescent{right:89px;bottom:133px}
+.ability-bar #skill-storm{right:6px;bottom:151px;width:62px;height:62px;border-color:#dbc987}
+.ability-bar #heavy-btn{right:4px;bottom:94px;width:46px;height:46px}
+.ability-bar #heavy-btn .ability-symbol svg{width:23px;height:23px}
+.ability-bar #heavy-btn small{font-size:8px;line-height:10px}
+.ability-bar #potion-btn{right:204px;bottom:151px;width:43px;height:43px}
+.ability-bar #potion-btn .ability-symbol svg{width:22px;height:22px}
+@media(max-height:380px) and (orientation:landscape){.ability-bar{transform:scale(.9)}}
+/* Visual feedback only: input begins on any blank point in the left half. */
+#joystick{position:fixed;left:0;top:0;bottom:auto;transform:translate(-50%,-50%);visibility:hidden;opacity:0;pointer-events:none;transition:opacity .06s}
+#joystick.active{visibility:visible;opacity:1}
+#mobile-interact{bottom:0}
+
+.ability-bar .sword-skill .skill-key{display:grid!important;place-items:center;position:absolute;top:2px;left:3px;min-width:14px;height:15px;padding:0 2px;border:1px solid #92dbdf99;border-radius:3px;background:#091f29;color:#e0faff;font:700 11px/1 monospace;z-index:3;pointer-events:none}
