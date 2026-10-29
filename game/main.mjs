@@ -1,4 +1,4 @@
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.10.30.8';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.10.30.9';
 import {mountFullscreen} from './fullscreen.mjs';
 import {mountPanelFit} from './panel-fit.mjs?v=2026.10.30.4';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
@@ -16,7 +16,7 @@ const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.8';
+const GAME_VERSION='2026.10.30.9';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -169,6 +169,7 @@ function finishVictory(){if(!encounter||encounter.settled||enemies.length)return
   $('#victory-cover').hidden=false;questCheck();persist();renderUI();sound(680,.3,'sine');}
 function leaveEncounter({town=false,escaped=false}={}){const old=encounter;if(!old)return;clearActions();restoreBattleSkills();enemies.length=0;skillEffects.length=0;numbers.length=0;particles.length=0;loot.splice(0,loot.length,...old.worldLoot);
   mode='exploration';encounter=null;phase='playing';Object.assign(player,findFree(town?respawn.x:old.returnPoint.x,town?respawn.y:old.returnPoint.y,player.r));player.invuln=2;player.lastHurt=-100;encounterGrace=escaped?5:2;
+  updateMonsterHealthBars([]);
   for(const r of respawns)enemySpawn(r.type,r.x,r.y);respawns.length=0;
   $('#victory-cover').hidden=true;$('#encounter-cover').hidden=true;$('#boss-bar').hidden=true;document.body.classList.remove('in-battle');
   if(escaped)toast('已脱离战斗，返回遇敌地点；没有获得战利品');else if(!town)toast('已返回遇敌地点，战利品已收入背包');persist();renderUI();}
@@ -299,7 +300,7 @@ function render(){if(!world)return;const stamp=performance.now(),frozen=orientat
   sorted.sort((a,b)=>a.depth-b.depth);for(const o of sorted)o.draw();drawSwordEffects();
   for(const p of particles){ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,2,2);}for(const n of numbers){ctx.globalAlpha=Math.min(1,n.life*2);worldText(n.text,n.x,n.y,n.color,10);}ctx.globalAlpha=1;
   const goal=objective();if(goal){const dx=goal.x-player.x,dy=goal.y-player.y;if(Math.hypot(dx,dy)>(battle?Math.min(115,screenW/zoom*.4):220)){const a=Math.atan2(dy,dx),r=Math.min(screenW/zoom*.36,screenH/zoom*.32),x=player.x+Math.cos(a)*r,y=player.y+Math.sin(a)*r;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle='#e3c384';ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-4,-4);ctx.lineTo(-4,4);ctx.closePath();ctx.fill();ctx.restore();worldText(goal.label||'铁匠铺',x,y+14,'#e5cd95',8);}}
-  updateMonsterHealthBars((mode==='battle'?enemies:mapEnemies.filter(e=>distance(e,player)<135)).filter(e=>e.type!=='boss'),ctx.getTransform(),screenW,screenH,e=>{const frame=world.atlas[world.meadowClips?.[e.type]?.[0]];return MEADOW&&frame?frame.h*(ACTOR_SCALE[e.type]||1):MINE?(e.type==='elite'?95:62):e.type==='elite'?58:42;});
+  updateMonsterHealthBars((mode==='battle'?enemies:[]).filter(e=>e.type!=='boss'),ctx.getTransform(),screenW,screenH,e=>{const frame=world.atlas[world.meadowClips?.[e.type]?.[0]];return MEADOW&&frame?frame.h*(ACTOR_SCALE[e.type]||1):MINE?(e.type==='elite'?95:62):e.type==='elite'?58:42;});
   positionBossBar();ctx.setTransform(1,0,0,1,0,0);
   renderCharacterPreview(stamp);
   // The phone UI hides this minimap. Render it only when a future layout exposes it.
