@@ -4,7 +4,7 @@ import {createSwordVfx} from './sword-vfx.mjs';
 import {mountCharacterPanel} from './character-panel.mjs';
 import {createMeadowFish} from './meadow-fish.mjs';
 import {createMeadowRipples} from './meadow-ripples.mjs';
-import {drawTerrainTiles} from './terrain-tiles.mjs';
+import {drawTerrainTiles} from './terrain-tiles.mjs?v=2';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
