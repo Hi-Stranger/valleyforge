@@ -17,7 +17,7 @@ const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.14';
+const GAME_VERSION='2026.10.30.16';
 const QA=new URLSearchParams(location.search).has('qa');
 // Town is the safe starting hub; the meadow remains an independent encounter map.
 const TOWN=new URLSearchParams(location.search).get('region')==='town'||!new URLSearchParams(location.search).has('region');
@@ -32,7 +32,7 @@ const ARENA={width:960,height:480,obstacles:[{x:105,y:101,w:38,h:24},{x:793,y:37
 let state;try{state=loadState(localStorage.getItem(SAVE_KEY));}catch{state=newState();}
 const player={x:2384,y:1072,r:8,stamina:100,aim:Math.PI,dir:'down',moving:false,invuln:0,attack:0,attackCooldown:0,heavyCooldown:0,roll:0,rollCooldown:0,rollAngle:0,charmBuff:0,lastHurt:-100};
 const camera={x:0,y:0};const keys=new Set();const mobileKeys=new Set();let pointer={down:false,active:false,x:0,y:0},swing=null,channel=0,screenShake=0,muted=true,audio=null,targetMarker=null,lastPickup='';
-let walkPath=[];
+let walkPath=[],walkRippleStart=-Infinity;
 const joystick={x:0,y:0,active:false,id:null,originX:0,originY:0};let attackPointer=null,orientationBlocked=false,queuedHeavy=0;
 const swordVfx=createSwordVfx();
 const skillCooldowns=Object.fromEntries(Object.keys(SWORD_SKILLS).map(id=>[id,0])),skillEffects=[];
@@ -196,7 +196,7 @@ function travelRegion(region){persist();const url=new URL(location.href);url.sea
 function openTownShop(shop){shopFilter=['weapon','armor'].includes(shop.id)?shop.id:null;if(['forge','weapon','armor'].includes(shop.id)){openModal('forge');return;}openModal(shop.id==='potion'?'pharmacy':'goods');}
 function interact(){if(phase!=='playing'||modal||mode!=='exploration')return;const near=nearby();if(near?.kind==='shop'){openTownShop(near.shop);return;}if(near?.kind==='town-exit'){travelRegion('meadow');return;}if(near?.kind==='town-entry'){travelRegion('town');return;}if(near?.kind==='smith'){openModal('forge');return;}if(near?.kind==='node'){harvest(near.node);return;}if(safeZone()){rest();return;}toast('靠近铁匠或采集点按 E；靠近怪物会自动进入战斗');}
 function walkSegment(a,b){let previous=a;const steps=Math.max(1,Math.ceil(distance(a,b)/4));for(let i=1;i<=steps;i++){const next={x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps};if(!pointFree(next.x,next.y,player.r)||!transition(previous.x,previous.y,next.x,next.y))return false;previous=next;}return true;}
-function setWalkTarget(x,y){const goal=findFree(x,y,player.r);walkPath=[];if(walkSegment(player,goal))walkPath=[goal];else{const route=pathTo(player,goal.x,goal.y,true);if(route?.length&&walkSegment(player,route[0])){walkPath=route;if(walkSegment(route.at(-1),goal))walkPath.push(goal);}}if(!walkPath.length){toast('这里暂时无法到达，请点击附近道路');return;}pointer.active=false;channel=0;}
+function setWalkTarget(x,y){const goal=findFree(x,y,player.r);walkPath=[];if(walkSegment(player,goal))walkPath=[goal];else{const route=pathTo(player,goal.x,goal.y,true);if(route?.length&&walkSegment(player,route[0])){walkPath=route;if(walkSegment(route.at(-1),goal))walkPath.push(goal);}}if(!walkPath.length){toast('这里暂时无法到达，请点击附近道路');return;}walkRippleStart=time;pointer.active=false;channel=0;}
 function explorationVector(dt){const manual=movementVector();if(manual.x||manual.y){walkPath=[];return manual;}while(walkPath.length&&distance(player,walkPath[0])<2)walkPath.shift();if(!walkPath.length)return {x:0,y:0};const target=walkPath[0],length=distance(player,target),scale=Math.min(1,length/(145*dt));if(!walkSegment(player,target)){walkPath=[];return {x:0,y:0};}return {x:(target.x-player.x)/length*scale,y:(target.y-player.y)/length*scale};}
 function movementVector(){if(joystick.active)return Math.hypot(joystick.x,joystick.y)>.12?{x:joystick.x,y:joystick.y}:{x:0,y:0};let x=0,y=0;if(keys.has('KeyW')||keys.has('ArrowUp')||mobileKeys.has('up'))y--;if(keys.has('KeyS')||keys.has('ArrowDown')||mobileKeys.has('down'))y++;if(keys.has('KeyA')||keys.has('ArrowLeft')||mobileKeys.has('left'))x--;if(keys.has('KeyD')||keys.has('ArrowRight')||mobileKeys.has('right'))x++;let len=Math.hypot(x,y);return len?{x:x/len,y:y/len}:{x:0,y:0};}
 function updateExploration(dt){encounterGrace=Math.max(0,encounterGrace-dt);
@@ -284,6 +284,26 @@ function drawPlayer(){ctx.save();ctx.translate(player.x,player.y);ctx.scale(ACTO
   if(swing){let t=1-swing.time/.24;ctx.save();ctx.translate(player.x,player.y-10);ctx.rotate(swing.angle);ctx.strokeStyle=swing.heavy?'#ecc77e':'#ebefd7';ctx.lineWidth=swing.heavy?5:3;ctx.globalAlpha=1-t;ctx.beginPath();ctx.arc(0,0,swing.range*.85,-1.3+t*.5,1.3+t*.5);ctx.stroke();ctx.restore();}
 ctx.restore();}
 function drawNode(n){if(n.respawn>0)return;shadow(n.x,n.y,12);if(n.type==='wood')drawClip('node.wood',n.x,n.y,1.15,false,0);else drawFrame('node:ore'+(n.type==='crystal'?4:2),n.x,n.y,.7);if(distance(n,player)<110){worldText(n.type==='wood'?'枯木':n.type==='iron'?'铁矿':'晶矿',n.x,n.y-34,'#d8c796',8);ctx.fillStyle='#e1cb8d';ctx.fillRect(n.x+11,n.y-20,2,2);}}
+// Keep the destination visible until its route finishes or is cancelled.
+function drawWalkRipple(){
+  const age=time-walkRippleStart;
+  if(mode!=='exploration'||!walkPath.length||age<0)return;
+  const goal=walkPath.at(-1),progress=(age%1.2)/1.2,ease=1-(1-progress)**2;
+  ctx.save();
+  ctx.strokeStyle='#ffe5a6';ctx.lineWidth=1;
+  // Persistent double rings keep the destination readable between ripples.
+  for(const [radius,opacity] of [[7,.85],[12,.6]]){
+    ctx.globalAlpha=opacity;
+    ctx.beginPath();ctx.ellipse(goal.x,goal.y,radius,radius*.55,0,0,Math.PI*2);ctx.stroke();
+  }
+  for(const [base,growth,opacity] of [[7,6,.5],[12,6,.35]]){
+    const radius=base+growth*ease;
+    ctx.globalAlpha=opacity*Math.sin(Math.PI*progress)**2;
+    ctx.beginPath();ctx.ellipse(goal.x,goal.y,radius,radius*.55,0,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawSmith(){shadow(smith.x,smith.y,11);drawClip('smith.idle',smith.x,smith.y,.5);worldText('⚒ 铁匠 · 老铎',smith.x,smith.y-53,'#ead09b',9);if(distance(player,smith)<90){ctx.strokeStyle='#d9bd7d66';ctx.beginPath();ctx.ellipse(smith.x,smith.y,15,6,0,0,Math.PI*2);ctx.stroke();}}
 function objective(){if(TOWN)return targetMarker&&distance(player,targetMarker)>65?targetMarker:null;if(mode==='battle'){const e=enemies[0];return e?{...e,label:e.type==='boss'?e.name:'敌人'}:null;}if(targetMarker&&distance(player,targetMarker)>65)return targetMarker;if(MEADOW){const e=mapEnemies.find(e=>distance(e,player)>180);return e?null:{...gateway,label:'原野入口'};}if(MINE)return null;if(state.quest===0){const e=mapEnemies.filter(e=>['slime','boar'].includes(e.type)).sort((a,b)=>distance(a,player)-distance(b,player))[0];return e?null:smith;}
   const recipe=GEAR[state.tracked]?.recipe;if(recipe&&!state.owned.includes(state.tracked))for(const [id,n] of Object.entries(recipe)){if(materialTotal(state,id)>=n)continue;const node=nodes.filter(node=>node.type===id&&!node.respawn).sort((a,b)=>distance(a,player)-distance(b,player))[0];if(node)return {...node,label:node.type==='wood'?'枯木采集点':'矿点'};
@@ -302,7 +322,7 @@ function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'
   camera.y=screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*(TOWN?.84:.5),0,height-screenH/zoom);
   ctx.setTransform(zoom,0,0,zoom,-Math.round(camera.x*zoom)+(Math.random()-.5)*screenShake,-Math.round(camera.y*zoom)+(Math.random()-.5)*screenShake);
   if(battle){if(MINE)ctx.drawImage(ground,world.bossPoint.x-380,world.bossPoint.y-190,760,380,0,0,ARENA.width,ARENA.height);else ctx.drawImage(arenaImages[encounter.theme],0,0);if(encounter.theme==='cave'){ctx.fillStyle='#10192440';ctx.fillRect(0,0,ARENA.width,ARENA.height);}ctx.strokeStyle='#d4c28b50';ctx.lineWidth=1;ctx.strokeRect(41,73,ARENA.width-82,ARENA.height-131);}
-  else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);if(walkPath.length){const goal=walkPath.at(-1);ctx.strokeStyle='#f1d89d';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(goal.x,goal.y,9,5,0,0,Math.PI*2);ctx.stroke();}}
+  else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
   for(const item of loot){shadow(item.x,item.y,7);const icon='icon:'+item.key;const f=world.atlas[icon];if(f){const scale=14/Math.max(f.w,f.h);ctx.drawImage(atlas,f.x,f.y,f.w,f.h,item.x-7,item.y-15+Math.sin(time*4)*2,f.w*scale,f.h*scale);}ctx.fillStyle=MATERIALS[item.key]?.color||'#e6c883';ctx.fillRect(item.x-1,item.y-23+Math.sin(time*4)*2,2,2);}
   if(battle){for(const e of enemies)if(e.boar)boarKingArt.ground(ctx,e);drawSwordEffects('ground');}
   const sorted=battle?[...enemies.map(e=>({depth:e.y,draw:()=>drawEnemy(e)})),{depth:player.y,draw:drawPlayer}]:
