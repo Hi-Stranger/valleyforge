@@ -16,7 +16,7 @@ const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.11';
+const GAME_VERSION='2026.10.30.12';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -279,9 +279,9 @@ function drawPlayer(){ctx.save();ctx.translate(player.x,player.y);ctx.scale(ACTO
 ctx.restore();}
 function drawNode(n){if(n.respawn>0)return;shadow(n.x,n.y,12);if(n.type==='wood')drawClip('node.wood',n.x,n.y,1.15,false,0);else drawFrame('node:ore'+(n.type==='crystal'?4:2),n.x,n.y,.7);if(distance(n,player)<110){worldText(n.type==='wood'?'枯木':n.type==='iron'?'铁矿':'晶矿',n.x,n.y-34,'#d8c796',8);ctx.fillStyle='#e1cb8d';ctx.fillRect(n.x+11,n.y-20,2,2);}}
 function drawSmith(){shadow(smith.x,smith.y,11);drawClip('smith.idle',smith.x,smith.y,.5);worldText('⚒ 铁匠 · 老铎',smith.x,smith.y-53,'#ead09b',9);if(distance(player,smith)<90){ctx.strokeStyle='#d9bd7d66';ctx.beginPath();ctx.ellipse(smith.x,smith.y,15,6,0,0,Math.PI*2);ctx.stroke();}}
-function objective(){if(mode==='battle'){const e=enemies[0];return e?{...e,label:e.type==='boss'?e.name:'敌人'}:null;}if(targetMarker&&distance(player,targetMarker)>65)return targetMarker;if(MEADOW){const e=mapEnemies.find(e=>distance(e,player)>180);return e?{...e,label:'原野怪物'}:{...gateway,label:'原野入口'};}if(MINE)return {...world.bossPoint,label:'废矿深窟 · 首领'};if(state.quest===0){const e=mapEnemies.filter(e=>['slime','boar'].includes(e.type)).sort((a,b)=>distance(a,player)-distance(b,player))[0];return e?{x:e.x,y:e.y,label:'林地怪物'}:smith;}
+function objective(){if(mode==='battle'){const e=enemies[0];return e?{...e,label:e.type==='boss'?e.name:'敌人'}:null;}if(targetMarker&&distance(player,targetMarker)>65)return targetMarker;if(MEADOW){const e=mapEnemies.find(e=>distance(e,player)>180);return e?null:{...gateway,label:'原野入口'};}if(MINE)return null;if(state.quest===0){const e=mapEnemies.filter(e=>['slime','boar'].includes(e.type)).sort((a,b)=>distance(a,player)-distance(b,player))[0];return e?null:smith;}
   const recipe=GEAR[state.tracked]?.recipe;if(recipe&&!state.owned.includes(state.tracked))for(const [id,n] of Object.entries(recipe)){if(materialTotal(state,id)>=n)continue;const node=nodes.filter(node=>node.type===id&&!node.respawn).sort((a,b)=>distance(a,player)-distance(b,player))[0];if(node)return {...node,label:node.type==='wood'?'枯木采集点':'矿点'};
-    const type=id==='gel'?'slime':['skin','fang'].includes(id)?'boar':id==='core'?'boss':id==='crystal'?'elite':'skeleton';const e=mapEnemies.filter(e=>e.type===type).sort((a,b)=>distance(a,player)-distance(b,player))[0];if(e)return {...e,label:TYPES[type].name};}
+    const type=id==='gel'?'slime':['skin','fang'].includes(id)?'boar':id==='core'?'boss':id==='crystal'?'elite':'skeleton';const e=mapEnemies.filter(e=>e.type===type).sort((a,b)=>distance(a,player)-distance(b,player))[0];if(e)return null;}
   return {...smith,label:'铁匠铺'};}
 function drawMapEnemy(e){if(MEADOW&&e.type==='boss'){drawBoarKing(e,true);return;}shadow(e.x,e.y,e.r);const dir=Math.abs(Math.cos(e.angle))>.65?'right':Math.sin(e.angle)>0?'down':'up';
   const clip=e.type==='skeleton'?`skeleton.${e.moving?'walk':'idle'}.${dir}`:e.type==='boar'?'boar.walk':`${e.type}.${e.moving?'walk':'idle'}`;
