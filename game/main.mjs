@@ -1,4 +1,4 @@
-import {mountTownNavigation} from './town.mjs?v=2026.10.30.14';
+import {mountTownNavigation} from './town.mjs?v=2026.10.30.18';
 import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.10.30.10';
 import {mountFullscreen} from './fullscreen.mjs';
 import {mountPanelFit} from './panel-fit.mjs?v=2026.10.30.4';
@@ -17,7 +17,7 @@ const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.16';
+const GAME_VERSION='2026.10.30.18';
 const QA=new URLSearchParams(location.search).has('qa');
 // Town is the safe starting hub; the meadow remains an independent encounter map.
 const TOWN=new URLSearchParams(location.search).get('region')==='town'||!new URLSearchParams(location.search).has('region');
@@ -294,12 +294,12 @@ function drawWalkRipple(){
   // Persistent double rings keep the destination readable between ripples.
   for(const [radius,opacity] of [[7,.85],[12,.6]]){
     ctx.globalAlpha=opacity;
-    ctx.beginPath();ctx.ellipse(goal.x,goal.y,radius,radius*.55,0,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(goal.x,goal.y,radius*1.8,radius*.55*1.8,0,0,Math.PI*2);ctx.stroke();
   }
   for(const [base,growth,opacity] of [[7,6,.5],[12,6,.35]]){
     const radius=base+growth*ease;
     ctx.globalAlpha=opacity*Math.sin(Math.PI*progress)**2;
-    ctx.beginPath();ctx.ellipse(goal.x,goal.y,radius,radius*.55,0,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(goal.x,goal.y,radius*1.8,radius*.55*1.8,0,0,Math.PI*2);ctx.stroke();
   }
   ctx.restore();
 }
@@ -322,7 +322,7 @@ function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'
   camera.y=screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*(TOWN?.84:.5),0,height-screenH/zoom);
   ctx.setTransform(zoom,0,0,zoom,-Math.round(camera.x*zoom)+(Math.random()-.5)*screenShake,-Math.round(camera.y*zoom)+(Math.random()-.5)*screenShake);
   if(battle){if(MINE)ctx.drawImage(ground,world.bossPoint.x-380,world.bossPoint.y-190,760,380,0,0,ARENA.width,ARENA.height);else ctx.drawImage(arenaImages[encounter.theme],0,0);if(encounter.theme==='cave'){ctx.fillStyle='#10192440';ctx.fillRect(0,0,ARENA.width,ARENA.height);}ctx.strokeStyle='#d4c28b50';ctx.lineWidth=1;ctx.strokeRect(41,73,ARENA.width-82,ARENA.height-131);}
-  else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
+  else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());for(const o of world.groundObjects)sceneObject(o);worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
   for(const item of loot){shadow(item.x,item.y,7);const icon='icon:'+item.key;const f=world.atlas[icon];if(f){const scale=14/Math.max(f.w,f.h);ctx.drawImage(atlas,f.x,f.y,f.w,f.h,item.x-7,item.y-15+Math.sin(time*4)*2,f.w*scale,f.h*scale);}ctx.fillStyle=MATERIALS[item.key]?.color||'#e6c883';ctx.fillRect(item.x-1,item.y-23+Math.sin(time*4)*2,2,2);}
   if(battle){for(const e of enemies)if(e.boar)boarKingArt.ground(ctx,e);drawSwordEffects('ground');}
   const sorted=battle?[...enemies.map(e=>({depth:e.y,draw:()=>drawEnemy(e)})),{depth:player.y,draw:drawPlayer}]:
