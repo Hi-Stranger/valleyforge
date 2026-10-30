@@ -37,6 +37,7 @@
     "game/assets/sprites.png",
     "game/assets/town-atlas.png",
     "game/assets/town-minimap.png",
+    "game/assets/town-nav-icons.png",
     "game/assets/town-world.json",
     "game/assets/world.json",
     "game/boar-king-art.mjs",
