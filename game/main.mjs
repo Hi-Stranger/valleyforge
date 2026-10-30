@@ -1,4 +1,4 @@
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.10.30.9';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.10.30.10';
 import {mountFullscreen} from './fullscreen.mjs';
 import {mountPanelFit} from './panel-fit.mjs?v=2026.10.30.4';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
@@ -8,15 +8,15 @@ import {mountCharacterPanel} from './character-panel.mjs';
 import {createMeadowFish} from './meadow-fish.mjs';
 import {createMeadowRipples} from './meadow-ripples.mjs';
 import {drawTerrainTiles} from './terrain-tiles.mjs?v=2';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs';
-import {loadBoarKingArt} from './boar-king-art.mjs';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.10.30.10';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.10.30.10';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.9';
+const GAME_VERSION='2026.10.30.10';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -318,7 +318,7 @@ const QUESTS=[
   {title:'把材料交给铁匠',desc:'收集木材 ×4、兽牙 ×2、凝胶 ×2，回铁匠老铎处打造兽牙短剑。打开手记可返回小镇。',goal:()=>state.crafted.includes('fangblade')?'已打造':'未打造',line:'打造兽牙短剑'},
   {title:'穿上自己的作品',desc:'在背包的装备页，或铁匠打造结果中穿戴兽牙短剑。攻击力、攻速与外观会立即改变。',goal:()=>state.equipped.weapon==='fangblade'?'已穿戴':'未穿戴',line:'穿戴兽牙短剑'},
   {title:'岩洞前的重甲守卫',desc:'带上新装备，沿西岸道路前往岩洞。守卫会蓄力攻击，利用闪避和重斩寻找机会。',goal:()=>state.kills.elite?'已完成':'0 / 1',line:'击败岩甲守卫'},
-  {title:'原野中的野猪王',desc:'前往原野中央草地挑战荒牙野猪王。近身留意吼叫，中距离躲开跳扑，远距离提防满怒冲撞。',goal:()=>state.kills.boss?'已完成':'0 / 1',line:'击败荒牙野猪王'},
+  {title:'原野中的野猪王',desc:'前往原野中央草地挑战荒牙野猪王。近身留意吼叫，中距离躲开跳扑，满怒时随时提防加宽冲撞。',goal:()=>state.kills.boss?'已完成':'0 / 1',line:'击败荒牙野猪王'},
   {title:'把黎明铸进剑里',desc:'将首领核心、铁矿和晶石交给铁匠，铸造传说武器「风脊·破晓」。',goal:()=>state.crafted.includes('coreblade')?'已完成':'未打造',line:'打造风脊·破晓'},
   {title:'溪谷记得你的名字',desc:'第一章已完成。你仍可探索山林、收集材料，尝试不同武器与饰品的搭配。',goal:()=> '已完成',line:'第一章 · 完成'},
 ];

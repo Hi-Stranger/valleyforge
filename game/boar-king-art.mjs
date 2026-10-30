@@ -1,4 +1,4 @@
-import {BOAR_KING,boarKingFrame} from './boar-king.mjs';
+import {BOAR_KING,boarKingFrame} from './boar-king.mjs?v=2026.10.30.10';
 
 // Normalize generated sheet cells once; every runtime frame uses a cropped source.
 function sheetFrames(image,rows){const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);const cw=image.width/4,ch=image.height/rows,frames=[];
@@ -14,7 +14,7 @@ export async function loadBoarKingArt(loadImage,version){const [motion,pounce]=a
    const ring=(x,y,rx,ry,fill,stroke)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}};
    if(b.action==='roar'){const progress=Math.min(1,b.clock/BOAR_KING.roarWindup);ring(e.x,e.y,BOAR_KING.roarRadius,BOAR_KING.roarRadius,'rgba(201,95,41,'+(.08+progress*.12)+')','#edbe80');if(b.clock>=BOAR_KING.roarWindup&&b.clock<1.4)for(let i=0;i<3;i++){const p=((b.clock-.6)*1.8+i/3)%1;ctx.globalAlpha=1-p;ring(e.x,e.y,20+p*102,20+p*102,null,'#ffdf9f');}}
    if(b.action==='pounce'&&b.target){ring(b.target.x,b.target.y,BOAR_KING.pounceRadius,BOAR_KING.pounceRadius,'#d963392b','#f0b67f');ctx.setLineDash([5,4]);ring(b.target.x,b.target.y,BOAR_KING.pounceRadius+5,BOAR_KING.pounceRadius+5,null,'#e6c28c');}
-   if(b.action==='chargeWindup'){ctx.translate(e.x,e.y);ctx.rotate(b.direction);ctx.fillStyle='#df623b38';ctx.fillRect(0,-e.r-9,BOAR_KING.chargeSpeed*BOAR_KING.chargeDuration,(e.r+9)*2);ctx.strokeStyle=b.clock>=BOAR_KING.chargeLock?'#ffdf9d':'#e4b97b';ctx.setLineDash([7,5]);ctx.strokeRect(0,-e.r-9,BOAR_KING.chargeSpeed*BOAR_KING.chargeDuration,(e.r+9)*2);ctx.setLineDash([]);for(let x=75;x<550;x+=75){ctx.beginPath();ctx.moveTo(x-8,-7);ctx.lineTo(x,0);ctx.lineTo(x-8,7);ctx.stroke();}}
+   if(b.action==='chargeWindup'){ctx.translate(e.x,e.y);ctx.rotate(b.direction);ctx.fillStyle='#df623b38';ctx.fillRect(0,-BOAR_KING.chargeWidth/2,BOAR_KING.chargeSpeed*BOAR_KING.chargeDuration,BOAR_KING.chargeWidth);ctx.strokeStyle=b.clock>=BOAR_KING.chargeLock?'#ffdf9d':'#e4b97b';ctx.setLineDash([7,5]);ctx.strokeRect(0,-BOAR_KING.chargeWidth/2,BOAR_KING.chargeSpeed*BOAR_KING.chargeDuration,BOAR_KING.chargeWidth);ctx.setLineDash([]);for(let x=75;x<550;x+=75){ctx.beginPath();ctx.moveTo(x-8,-7);ctx.lineTo(x,0);ctx.lineTo(x-8,7);ctx.stroke();}}
    if(b.action==='recover'&&b.landingPose&&b.clock<.4){const p=b.clock/.4;ctx.globalAlpha=1-p;ring(e.x,e.y,22+p*65,10+p*27,null,'#efd394');}
    ctx.restore();
   },

@@ -1,7 +1,7 @@
 // Distances are arena/world units. Random decisions use a timer, never frame rate.
 export const BOAR_KING={near:115,medium:290,roarRadius:122,pounceRadius:55,rageRate:3,rageOnHit:12,
   roarChance:.8,pounceChance:.5,roarWindup:.6,pounceWindup:.6,pounceFlight:.75,
-  chargeWindup:1.2,chargeLock:.9,chargeSpeed:520,chargeDuration:1.1,recovery:2.2};
+  chargeWindup:1.2,chargeLock:.9,chargeSpeed:520,chargeDuration:1.1,chargeWidth:90,recovery:2.2};
 export const BOAR_ACTIONS={idle:'观察距离',roar:'近身吼叫',pounce:'跃起扑击',chargeWindup:'跺脚蓄力',charge:'怒气冲撞',recover:'喘息 · 反击机会'};
 export function createBoarKing(){return {rage:0,action:'idle',clock:0,cooldown:1.1,decision:0,height:0,target:null,start:null,direction:0,hit:false,landed:false,recovery:0,stomps:0};}
 export function enrageBoarKing(e){e.boar.rage=Math.min(100,e.boar.rage+BOAR_KING.rageOnHit);}
@@ -35,14 +35,14 @@ export function updateBoarKing(e,dt,{player,move,findFree,damage,emit=()=>{},ran
   const from={x:e.x,y:e.y},dx=Math.cos(b.direction)*c.chargeSpeed*dt,dy=Math.sin(b.direction)*c.chargeSpeed*dt;
   const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/6));let moved=0;
   for(let i=0;i<steps;i++)moved+=move(e,dx/steps,dy/steps);e.moving=true;
-  if(!b.hit&&segmentDistance(player,from,e)<=e.r+player.r+6){b.hit=true;damage(26);}
+  if(!b.hit&&segmentDistance(player,from,e)<=c.chargeWidth/2+player.r){b.hit=true;damage(26);}
   if(b.clock>=c.chargeDuration||moved<Math.hypot(dx,dy)*.85){emit('chargeImpact',e);recover(c.recovery);}return;
  }
  if(b.action==='recover'){if(b.clock>=b.recovery){start('idle');b.cooldown=.65;b.decision=0;}return;}
  b.cooldown=Math.max(0,b.cooldown-dt);b.decision=Math.max(0,b.decision-dt);if(e.stun>0)return;
  face();
  if(b.cooldown<=0&&b.decision<=0){b.decision=.9+random()*.5;
-  if(dist>c.medium&&b.rage>=100){start('chargeWindup');b.direction=e.angle;return;}
+  if(b.rage>=100){start('chargeWindup');b.direction=e.angle;return;}
   if(dist<=c.near&&random()<c.roarChance){start('roar');return;}
   if(dist>c.near&&dist<=c.medium&&random()<c.pounceChance){start('pounce');b.start={x:e.x,y:e.y};b.target=findFree(player.x,player.y,e.r);return;}
  }
