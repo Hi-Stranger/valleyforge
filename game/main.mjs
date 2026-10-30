@@ -16,7 +16,7 @@ const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.10.30.10';
+const GAME_VERSION='2026.10.30.11';
 const QA=new URLSearchParams(location.search).has('qa');
 // Only the meadow is available; legacy region links use the same map.
 const MINE=false;
@@ -195,7 +195,12 @@ function explorationVector(dt){const manual=movementVector();if(manual.x||manual
 function movementVector(){if(joystick.active)return Math.hypot(joystick.x,joystick.y)>.12?{x:joystick.x,y:joystick.y}:{x:0,y:0};let x=0,y=0;if(keys.has('KeyW')||keys.has('ArrowUp')||mobileKeys.has('up'))y--;if(keys.has('KeyS')||keys.has('ArrowDown')||mobileKeys.has('down'))y++;if(keys.has('KeyA')||keys.has('ArrowLeft')||mobileKeys.has('left'))x--;if(keys.has('KeyD')||keys.has('ArrowRight')||mobileKeys.has('right'))x++;let len=Math.hypot(x,y);return len?{x:x/len,y:y/len}:{x:0,y:0};}
 function updateExploration(dt){encounterGrace=Math.max(0,encounterGrace-dt);
   for(const e of mapEnemies){e.wander+=dt;e.moving=false;let target=distance(e,e.home)>28?e.home:Math.sin(e.wander*.7)>.6?{x:e.home.x+Math.cos(e.wander*.25)*20,y:e.home.y+Math.sin(e.wander*.3)*20}:null;
-    if(target){e.angle=Math.atan2(target.y-e.y,target.x-e.x);e.moving=move(e,Math.cos(e.angle)*13*dt,Math.sin(e.angle)*13*dt)>.01;}
+    if(target){const dist=distance(e,target);
+      // Separate arrival and restart distances prevent tiny target changes from toggling the pose.
+      if(dist<=1+1e-6)e.patrolStopped=true;
+      else if(dist>3)e.patrolStopped=false;
+      const step=e.patrolStopped?0:Math.min(13*dt,Math.max(0,dist-1));
+      if(step>.01){const angle=Math.atan2(target.y-e.y,target.x-e.x);e.moving=move(e,Math.cos(angle)*step,Math.sin(angle)*step)>.01;if(e.moving)e.angle=angle;if(distance(e,target)<=1+1e-6)e.patrolStopped=true;}}
     if(encounterGrace>0||safeZone()||distance(e,player)>48+e.r||heightAt(e.x,e.y)!==heightAt(player.x,player.y))continue;
     let reachable=true,previous={x:player.x,y:player.y};
     for(let i=1;i<=8;i++){const x=player.x+(e.x-player.x)*i/8,y=player.y+(e.y-player.y)*i/8;
