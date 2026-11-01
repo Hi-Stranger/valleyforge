@@ -1,29 +1,29 @@
-import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.01.9';
-import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.01.9';
-import {createSceneResources} from './scene-resources.mjs?v=2026.11.01.9';
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.9';
-import {mountRegionMap} from './region-map.mjs?v=2026.11.01.9';
-import {mountTownNavigation} from './town.mjs?v=2026.11.01.9';
-import {createTownCamp} from './town-camp.mjs?v=2026.11.01.9';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.01.9';
-import {mountFullscreen} from './fullscreen.mjs?v=2026.11.01.9';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.01.9';
-import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.01.9';
-import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs?v=2026.11.01.9';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.01.9';
-import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.01.9';
-import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.01.9';
-import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.01.9';
-import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.01.9';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.01.9';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.01.9';
+import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.01.10';
+import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.01.10';
+import {createSceneResources} from './scene-resources.mjs?v=2026.11.01.10';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.10';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.01.10';
+import {mountTownNavigation} from './town.mjs?v=2026.11.01.10';
+import {createTownCamp} from './town-camp.mjs?v=2026.11.01.10';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.01.10';
+import {mountFullscreen} from './fullscreen.mjs?v=2026.11.01.10';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.01.10';
+import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.01.10';
+import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.01.10';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.01.10';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.01.10';
+import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.01.10';
+import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.01.10';
+import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.01.10';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.01.10';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.01.10';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.01.9';
+const GAME_VERSION='2026.11.01.10';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -136,14 +136,15 @@ function castSword(id){const def=SWORD_SKILLS[id];if(!def||mode!=='battle'||phas
   if(id==='storm')skillEffects.push({id:'ring',x:player.x,y:player.y,angle:0,life:2.3,max:2.3,radius:150});
   float(def.name,player.x,player.y-48,'#b5f5ff');sound(id==='storm'?180:650,.15,'triangle');renderHUD();return true;
 }
-function swordPulse(c,radius,halfAngle,multiplier,heavy=false){skillEffects.push({id:'arc',x:player.x,y:player.y,angle:c.angle,radius,life:.36,max:.36,halfAngle});
+function hitSwordEffect(f){for(const e of [...enemies])if(claimSwordHit(f,e)){hitEnemy(e,f.attack.damage,f.attack.heavy,true);if(phase!=='playing')return;}}
+function swordPulse(c,radius,halfAngle,multiplier,heavy=false){const f={id:'arc',x:player.x,y:player.y,angle:c.angle,radius,life:.36,max:.36,halfAngle,attack:{damage:Math.round(c.damage*multiplier),heavy,hit:new Set()}};skillEffects.push(f);
   if(c.id==='triple'){const clip=world.clips[`player.attack.${player.dir}`];skillEffects.push({id:'ghost',x:player.x-12*Math.cos(c.angle),y:player.y-12*Math.sin(c.angle),frame:clip[(c.pulse-1)%clip.length],flip:Math.cos(c.angle)<-.65,life:.25,max:.25});sound(480+c.pulse*100,.06,'triangle',.015);}
-  for(const e of [...enemies])if(inSwordSector(player,e,c.angle,radius,halfAngle)){hitEnemy(e,Math.round(c.damage*multiplier),heavy,true);if(phase!=='playing')break;}}
+  hitSwordEffect(f);}
 function updateSwordFields(dt){for(const c of [...swordFields]){c.age+=dt;
     for(const e of enemies)if((!e.boar||['idle','recover'].includes(e.boar.action))&&distance(e,c)<150&&distance(e,c)>35){const a=Math.atan2(c.y-e.y,c.x-e.x);move(e,Math.cos(a)*70*dt,Math.sin(a)*70*dt);}
     const beats=[.25,.55,.85,1.15,1.45,1.85];while(c.pulse<beats.length&&c.age>=beats[c.pulse]){const final=++c.pulse===6;
-      skillEffects.push({id:'burst',x:c.x,y:c.y,angle:0,radius:150,final,strike:c.pulse,life:final?.5:.22,max:final?.5:.22});
-      for(const e of [...enemies])if(distance(e,c)<=150+e.r){hitEnemy(e,Math.round(c.damage*(final?4:.7)),final,true);if(phase!=='playing')return;}
+      const f={id:'burst',x:c.x,y:c.y,angle:0,radius:150,final,strike:c.pulse,life:final?.5:.22,max:final?.5:.22,attack:{damage:Math.round(c.damage*(final?4:.7)),heavy:final,hit:new Set()}};skillEffects.push(f);
+      hitSwordEffect(f);if(phase!=='playing')return;
       if(final){screenShake=7;sound(110,.22,'triangle');}}
   
 if(c.age>=2.1)swordFields.splice(swordFields.indexOf(c),1);}}
@@ -177,7 +178,7 @@ function encounterTheme(token){if(MEADOW)return 'forest';if(MINE)return ['boss',
 const THEME_NAMES={forest:'林地遭遇',mountain:'山地遭遇',cave:'岩洞遭遇'};
 function resetJoystick(){joystick.x=joystick.y=0;joystick.active=false;joystick.id=null;$('#stick-knob').style.transform='translate(0px,0px)';$('#joystick').classList.remove('active');}
 function releaseControls(keepWalk=false){if(!keepWalk)walkPath=[];queuedSword=null;queuedHeavy=0;keys.clear();mobileKeys.clear();pointer.down=false;pointer.active=false;pointer.touchAim=false;attackPointer=null;resetJoystick();}
-function clearActions(){swordFields.length=0;swordCast=null;releaseControls();queuedHeavy=0;swing=null;channel=0;player.attack=0;player.roll=0;player.attackCooldown=0;player.charmBuff=0;screenShake=0;}
+function clearActions(){for(const f of skillEffects)delete f.attack;swordFields.length=0;swordCast=null;releaseControls();queuedHeavy=0;swing=null;channel=0;player.attack=0;player.roll=0;player.attackCooldown=0;player.charmBuff=0;screenShake=0;}
 function restoreBattleSkills(){for(const id of Object.keys(skillCooldowns))skillCooldowns[id]=0;player.heavyCooldown=0;player.rollCooldown=0;player.attackCooldown=0;queuedSword=null;queuedHeavy=0;}
 function beginEncounter(token){if(mode!=='exploration'||phase!=='playing'||encounter||encounterGrace>0)return;
   const theme=encounterTheme(token);
@@ -269,6 +270,8 @@ function update(dt){time+=dt;state.playtime+=dt;player.invuln=Math.max(0,player.
     else if(distance(e,e.home)>45)target=e.home;
     else{e.wander+=dt;if(Math.sin(e.wander*.9)>.7)target={x:e.home.x+Math.cos(e.wander*.3)*30,y:e.home.y+Math.sin(e.wander*.4)*30};}
     if(target){const a=Math.atan2(target.y-e.y,target.x-e.x);e.angle=a;const speed=e.speed*(chase?1:.48);e.moving=move(e,Math.cos(a)*speed*dt,Math.sin(a)*speed*dt)>0.1;}}
+  // Check again after enemy movement, at each released effect's fixed world position.
+  for(const f of skillEffects)if(f.attack){hitSwordEffect(f);if(phase!=='playing')return;}
   for(let i=loot.length-1;i>=0;i--){const item=loot[i];item.age+=dt;const d=distance(item,player);if(d<105){let a=Math.atan2(player.y-item.y,player.x-item.x);item.x+=Math.cos(a)*Math.min(d,260*dt);item.y+=Math.sin(a)*Math.min(d,260*dt);}if(d<20){addMaterials(state,item.items);lastPickup=Object.entries(item.items).map(([id,n])=>`${MATERIALS[id].name} +${n}`).join('  ');toast(lastPickup);loot.splice(i,1);sound(680,.06,'sine');questCheck();persist();renderUI();}}
   for(let i=numbers.length-1;i>=0;i--){numbers[i].life-=dt;numbers[i].y-=22*dt;if(numbers[i].life<=0)numbers.splice(i,1);}
   for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.life-=dt;p.x+=p.dx*dt;p.y+=p.dy*dt;p.dy+=150*dt;if(p.life<=0)particles.splice(i,1);}

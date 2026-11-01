@@ -5,8 +5,23 @@ export const SWORD_SKILLS={
   storm:{name:'千刃剑阵',short:'剑阵',cooldown:30,cost:45,key:'Digit4',duration:.22},
 };
 export function inSwordSector(origin,target,angle,radius,halfAngle){
-  const dx=target.x-origin.x,dy=target.y-origin.y;
-  return Math.hypot(dx,dy)<=radius+(target.r||0)&&Math.abs(Math.atan2(Math.sin(Math.atan2(dy,dx)-angle),Math.cos(Math.atan2(dy,dx)-angle)))<=halfAngle;
+  const dx=target.x-origin.x,dy=target.y-origin.y,r=target.r||0,dist=Math.hypot(dx,dy);
+  if(dist<=r)return true;
+  if(dist>radius+r)return false;
+  const offset=Math.abs(Math.atan2(Math.sin(Math.atan2(dy,dx)-angle),Math.cos(Math.atan2(dy,dx)-angle)));
+  if(offset<=halfAngle)return true;
+  // Outside the angle, intersect the nearest finite side (including its outer corner).
+  const delta=offset-halfAngle,along=Math.max(0,Math.min(radius,dist*Math.cos(delta)));
+  return Math.hypot(dist*Math.cos(delta)-along,dist*Math.sin(delta))<=r+1e-9;
+}
+// A visible attack owns its hit set, so later entrants can be hit without repeat damage.
+export function claimSwordHit(effect,target){
+  const attack=effect.attack;
+  if(!attack||effect.life<=0||attack.hit.has(target.id))return false;
+  const inside=effect.id==='arc'?inSwordSector(effect,target,effect.angle,effect.radius,effect.halfAngle):
+    effect.id==='burst'&&Math.hypot(target.x-effect.x,target.y-effect.y)<=effect.radius+(target.r||0);
+  if(!inside)return false;
+  attack.hit.add(target.id);return true;
 }
 export function inSwordPath(start,end,target,width){
   const dx=end.x-start.x,dy=end.y-start.y,l=dx*dx+dy*dy;
