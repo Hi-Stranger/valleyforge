@@ -10,12 +10,23 @@ export function campPosesAt(time){
 }
 
 export function createTownCamp({ctx,world,image,visible}){
+  const stamps=new Map();
+  const stampTransform=new DOMMatrix();
+  // Fixed lights retain native-sized gradients; variable smoke scales one stamp.
+  for(const [color,radius] of [['#ef821d',216],['#ff9e25',98],['#ffac2a',69],['#bd50f0',62],['#ffac30',7],['#ffcf69',21],['#be6bea',18],['#cbdc68',13],['#f0ed88',5]]){
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=radius*2+2;
+    const paint=canvas.getContext('2d'),gradient=paint.createRadialGradient(radius+1,radius+1,0,radius+1,radius+1,radius);
+    gradient.addColorStop(0,color);gradient.addColorStop(1,'transparent');paint.fillStyle=gradient;paint.fillRect(0,0,canvas.width,canvas.height);
+    stamps.set(color,{canvas,pattern:ctx.createPattern(canvas,'no-repeat'),radius});
+  }
   function glow(x,y,r,color,alpha){
     if(!visible(x,y,r))return;
     ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=alpha;
-    const gradient=ctx.createRadialGradient(x,y,0,x,y,r);
-    gradient.addColorStop(0,color);gradient.addColorStop(1,'transparent');
-    ctx.fillStyle=gradient;ctx.fillRect(x-r,y-r,r*2,r*2);ctx.restore();
+    const stamp=stamps.get(color),scale=r/stamp.radius,extent=(stamp.radius+1)*scale;
+    ctx.imageSmoothingEnabled=true;
+    stampTransform.a=stampTransform.d=scale;stampTransform.e=x-extent;stampTransform.f=y-extent;
+    stamp.pattern.setTransform(stampTransform);ctx.fillStyle=stamp.pattern;
+    ctx.fillRect(x-r,y-r,r*2,r*2);ctx.restore();
   }
   function pixel(x,y,w,color,alpha=1){
     ctx.globalAlpha=alpha;ctx.fillStyle=color;ctx.fillRect(Math.round(x/2)*2,Math.round(y/2)*2,w,w);ctx.globalAlpha=1;
@@ -85,5 +96,5 @@ export function createTownCamp({ctx,world,image,visible}){
     const q=time*TAU/6;
     return {clock:time,poses:campPosesAt(time),fireflies:FLIES.map(([x,y,rx,ry],i)=>({x:x+Math.cos(q+i*2.399)*rx+Math.sin(q*2+i*2.399)*4,y:y+Math.sin(q+i*2.399)*ry}))};
   }
-  return {drawObject,drawGround,drawFront,snapshot};
+  return {drawObject,drawGround,drawFront,snapshot,dispose(){for(const stamp of stamps.values())stamp.canvas.width=stamp.canvas.height=0;stamps.clear();image=null;}};
 }

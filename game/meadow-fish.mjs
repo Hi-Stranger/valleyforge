@@ -1,18 +1,10 @@
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.7';
 // Decorative fish swim beneath the static water surface and scenery.
-export function createMeadowFish({river,ground,atlas,world}){
+export function createMeadowFish({river,ground,atlas,world,water}){
   const W=world.width,H=world.height;
   const canvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
-  const source=canvas(W,H),read=source.getContext('2d',{willReadFrequently:true});
-  read.drawImage(ground,0,0);const base=read.getImageData(0,0,W,H).data;
-  read.clearRect(0,0,W,H);read.drawImage(river,0,0);const water=read.getImageData(0,0,W,H).data;
-  read.clearRect(0,0,W,H);read.imageSmoothingEnabled=false;
-  for(const o of [...world.groundObjects,...world.scene]){const f=world.atlas[o.frames[0].key];read.drawImage(atlas,f.x,f.y,f.w,f.h,o.x,o.y,f.w*o.scale,f.h*(o.scaleY||o.scale));}
-  const cover=read.getImageData(0,0,W,H).data,maskData=read.createImageData(W,H),cells=[];
-  for(let i=0;i<base.length;i+=4){const r=base[i],g=base[i+1],b=base[i+2],rr=water[i],rg=water[i+1],rb=water[i+2];
-    if(cover[i+3]>16||water[i+3]<128||!(b>r*1.35&&g>r*1.2&&b>g*.85&&rb>rr*1.35&&rg>rr*1.2&&rb>rg*.85))continue;
-    maskData.data[i]=maskData.data[i+1]=maskData.data[i+2]=255;maskData.data[i+3]=255;cells.push(i/4);
-  }
-  const wet=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&maskData.data[(Math.floor(y)*W+Math.floor(x))*4+3]>0;
+  const shared=water||prepareMeadowWater({river,ground,atlas,world}),{wet:wetPixels,cells}=shared;
+  const wet=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&wetPixels[Math.floor(y)*W+Math.floor(x)]>0;
   const fish=[];
   for(const [k,target] of [[1255,245],[1340,340],[1390,425],[1440,520],[1350,590],[1318,610],[1288,624],[1198,735],[1260,840]].entries()){
     let best=null,dist=Infinity;
@@ -25,13 +17,18 @@ export function createMeadowFish({river,ground,atlas,world}){
   if(!fish.length)return {draw(){},positions(){return [];}};
   const left=Math.max(0,Math.floor(Math.min(...fish.map(f=>f.x))-42)),top=Math.max(0,Math.floor(Math.min(...fish.map(f=>f.y))-30));
   const width=Math.min(W-left,Math.ceil(Math.max(...fish.map(f=>f.x))-left+42)),height=Math.min(H-top,Math.ceil(Math.max(...fish.map(f=>f.y))-top+30));
-  read.clearRect(0,0,W,H);read.putImageData(maskData,0,0);
-  const mask=canvas(width,height),frame=canvas(width,height),out=frame.getContext('2d');mask.getContext('2d').drawImage(source,left,top,width,height,0,0,width,height);
+  const mask=canvas(width,height),frame=canvas(width,height),out=frame.getContext('2d');
+  const maskOut=mask.getContext('2d'),maskData=maskOut.createImageData(width,height);
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++)if(wetPixels[(y+top)*W+x+left]){const i=(y*width+x)*4;maskData.data[i]=maskData.data[i+1]=maskData.data[i+2]=maskData.data[i+3]=255;}
+  maskOut.putImageData(maskData,0,0);
   const pose=(f,t)=>{const a=t*Math.PI/4+f.phase;return {x:f.x+Math.sin(a)*23,y:f.y+Math.cos(a)*11,angle:Math.atan2(-11*Math.sin(a),23*Math.cos(a))};};
-  let cached=-1;
+  let cached=-1,disposed=false;
+  if(!water)shared.dispose();
   return {
+    dispose(){disposed=true;mask.width=mask.height=frame.width=frame.height=0;fish.length=0;},
     positions(seconds){return fish.map(f=>{const p=pose(f,seconds);return {x:p.x,y:p.y};});},
     draw(ctx,seconds,view){
+      if(disposed)return;
       if(view&&(view.x>left+width||view.y>top+height||view.x+view.width<left||view.y+view.height<top))return;
       const tick=Math.floor(seconds*30);
       if(tick!==cached){cached=tick;const t=tick/30;out.clearRect(0,0,width,height);out.imageSmoothingEnabled=false;

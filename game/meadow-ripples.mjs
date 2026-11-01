@@ -1,20 +1,14 @@
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.7';
 // Local water undulation from the approved preview: no downstream scrolling.
-export function createMeadowRipples({river,ground,atlas,world}){
+export function createMeadowRipples({river,ground,atlas,world,water}){
   const W=world.width,H=world.height,strength=2.3;
   const canvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
-  const scratch=canvas(W,H),read=scratch.getContext('2d',{willReadFrequently:true});
-  read.drawImage(ground,0,0);const base=read.getImageData(0,0,W,H).data;
-  read.clearRect(0,0,W,H);read.drawImage(river,0,0);const source=read.getImageData(0,0,W,H).data;
-  read.clearRect(0,0,W,H);read.imageSmoothingEnabled=false;
-  for(const o of [...world.groundObjects,...world.scene]){const f=world.atlas[o.frames[0].key];read.drawImage(atlas,f.x,f.y,f.w,f.h,o.x,o.y,f.w*o.scale,f.h*(o.scaleY||o.scale));}
-  const cover=read.getImageData(0,0,W,H).data,wet=new Uint8Array(W*H),cells=[];
+  const shared=water||prepareMeadowWater({river,ground,atlas,world}),{base,wet,cells:wetCells}=shared,cells=[];
   let left=W,top=H,right=0,bottom=0;
   const points=[[965,-20],[1070,55],[1190,135],[1280,210],[1370,310],[1450,405],[1470,505],[1440,565],[1330,630],[1210,690],[1150,755],[1200,820],[1320,890],[1440,960],[1490,1060]];
   let distance=0;const segments=[];
   for(let j=0;j<points.length-1;j++){const [x,y]=points[j],[xx,yy]=points[j+1],dx=xx-x,dy=yy-y,len=Math.hypot(dx,dy);segments.push({x,y,dx,dy,len,s:distance});distance+=len;}
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-    const i=(y*W+x)*4,r=base[i],g=base[i+1],b=base[i+2],rr=source[i],rg=source[i+1],rb=source[i+2];
-    if(cover[i+3]>16||source[i+3]<128||!(b>r*1.35&&g>r*1.2&&b>g*.85&&rb>rr*1.35&&rg>rr*1.2&&rb>rg*.85))continue;
+  for(const pixel of wetCells){const x=pixel%W,y=Math.floor(pixel/W),i=pixel*4;
     let nearest=Infinity,s=0,n=0;
     for(const q of segments){const u=Math.max(0,Math.min(1,((x-q.x)*q.dx+(y-q.y)*q.dy)/(q.len*q.len))),px=q.x+q.dx*u,py=q.y+q.dy*u,d=(x-px)**2+(y-py)**2;if(d<nearest){nearest=d;s=q.s+q.len*u;n=((x-px)*-q.dy+(y-py)*q.dx)/q.len;}}
     cells.push({i,x,y,ss:Math.sin(s*.035),cs:Math.cos(s*.035),sn:Math.sin(n*.05),cn:Math.cos(n*.05)});wet[y*W+x]=1;
@@ -25,8 +19,10 @@ export function createMeadowRipples({river,ground,atlas,world}){
   for(const p of cells){p.local=((p.y-top)*width+p.x-left)*4;pixels.data[p.local+3]=255;maskPixels.data[p.local]=maskPixels.data[p.local+1]=maskPixels.data[p.local+2]=255;maskPixels.data[p.local+3]=255;}
   mask.getContext('2d').putImageData(maskPixels,0,0);
   const glints=Array.from({length:65},(_,k)=>{const p=cells[Math.floor(((k*.61803398875+.17)%1)*cells.length)];return {x:p.x-left,y:p.y-top,phase:k*.73,length:5+k%12};});
-  const dx=new Int16Array(H),dy=new Int16Array(W);let cached=-1;
-  return {draw(ctx,seconds,view){
+  const dx=new Int16Array(H),dy=new Int16Array(W);let cached=-1,disposed=false;
+  if(!water)shared.dispose();
+  return {dispose(){disposed=true;frame.width=frame.height=mask.width=mask.height=0;cells.length=0;},draw(ctx,seconds,view){
+    if(disposed)return;
     if(view&&(view.x>right||view.y>bottom||view.x+view.width<left||view.y+view.height<top))return;
     const tick=Math.floor(seconds*30);
     if(tick!==cached){cached=tick;const t=(tick/30)%4,a=t*Math.PI/2,st=Math.sin(a),ct=Math.cos(a);
