@@ -5,7 +5,7 @@ export function mountTownNavigation(shops,onNavigate){
   const positions={forge:'0%',weapon:'25%',armor:'50%',potion:'75%',goods:'100%'};
   for(const shop of shops){
     const button=document.createElement('button');button.type='button';button.dataset.shop=shop.id;
-    button.innerHTML=`<span aria-hidden="true" style="--icon-position:${positions[shop.id]}"></span><img class="town-nav-label" src="./game/assets/town-label-${shop.id}.png?v=2026.10.30.18" alt="" aria-hidden="true">`;
+    button.innerHTML=`<span aria-hidden="true" style="--icon-position:${positions[shop.id]}"></span><img class="town-nav-label" src="./game/assets/town-label-${shop.id}.png?v=2026.11.01.1" alt="" aria-hidden="true">`;
     button.setAttribute('aria-label',`自动前往${shop.name}`);
     button.setAttribute('aria-pressed',String(shop.id==='forge'));
     button.onclick=()=>{if(onNavigate(shop)!==false)for(const b of nav.children)b.setAttribute('aria-pressed',String(b===button));};
