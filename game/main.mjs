@@ -1,25 +1,25 @@
-import {mountRegionMap} from './region-map.mjs?v=2026.11.01.4';
-import {mountTownNavigation} from './town.mjs?v=2026.11.01.4';
-import {createTownCamp} from './town-camp.mjs?v=2026.11.01.4';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.01.4';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.01.5';
+import {mountTownNavigation} from './town.mjs?v=2026.11.01.5';
+import {createTownCamp} from './town-camp.mjs?v=2026.11.01.5';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.01.5';
 import {mountFullscreen} from './fullscreen.mjs';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.01.4';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.01.5';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
 import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs';
 import {createSwordVfx} from './sword-vfx.mjs';
 import {mountCharacterPanel} from './character-panel.mjs';
 import {createMeadowFish} from './meadow-fish.mjs';
 import {createMeadowRipples} from './meadow-ripples.mjs';
-import {drawTerrainTiles} from './terrain-tiles.mjs?v=2';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.01.4';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.01.4';
+import {drawTerrainTiles} from './terrain-tiles.mjs?v=2026.11.01.5';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.01.5';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.01.5';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.01.4';
+const GAME_VERSION='2026.11.01.5';
 const QA=new URLSearchParams(location.search).has('qa');
 // Town is the safe starting hub; the meadow remains an independent encounter map.
 const requestedRegion=new URLSearchParams(location.search).get('region');
