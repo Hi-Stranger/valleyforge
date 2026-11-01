@@ -1,4 +1,4 @@
-import {BOAR_KING,boarKingFrame} from './boar-king.mjs?v=2026.10.30.10';
+import {BOAR_KING,boarKingFrame} from './boar-king.mjs?v=2026.11.01.9';
 
 // Normalize generated sheet cells once; every runtime frame uses a cropped source.
 function sheetFrames(image,rows){const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);const cw=image.width/4,ch=image.height/rows,frames=[];

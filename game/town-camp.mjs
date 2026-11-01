@@ -96,5 +96,5 @@ export function createTownCamp({ctx,world,image,visible}){
     const q=time*TAU/6;
     return {clock:time,poses:campPosesAt(time),fireflies:FLIES.map(([x,y,rx,ry],i)=>({x:x+Math.cos(q+i*2.399)*rx+Math.sin(q*2+i*2.399)*4,y:y+Math.sin(q+i*2.399)*ry}))};
   }
-  return {drawObject,drawGround,drawFront,snapshot,dispose(){for(const stamp of stamps.values())stamp.canvas.width=stamp.canvas.height=0;stamps.clear();image=null;}};
+  return {drawObject,drawGround,drawFront,snapshot,cacheBytes:()=>[...stamps.values()].reduce((n,s)=>n+s.canvas.width*s.canvas.height*4,0),dispose(){for(const stamp of stamps.values())stamp.canvas.width=stamp.canvas.height=0;stamps.clear();image=null;}};
 }

@@ -1,4 +1,4 @@
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.7';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.9';
 // Local water undulation from the approved preview: no downstream scrolling.
 export function createMeadowRipples({river,ground,atlas,world,water}){
   const W=world.width,H=world.height,strength=2.3;
@@ -21,7 +21,7 @@ export function createMeadowRipples({river,ground,atlas,world,water}){
   const glints=Array.from({length:65},(_,k)=>{const p=cells[Math.floor(((k*.61803398875+.17)%1)*cells.length)];return {x:p.x-left,y:p.y-top,phase:k*.73,length:5+k%12};});
   const dx=new Int16Array(H),dy=new Int16Array(W);let cached=-1,disposed=false;
   if(!water)shared.dispose();
-  return {dispose(){disposed=true;frame.width=frame.height=mask.width=mask.height=0;cells.length=0;},draw(ctx,seconds,view){
+  return {cacheBytes:()=>disposed?0:base.byteLength+wet.byteLength+pixels.data.byteLength+(frame.width*frame.height+mask.width*mask.height)*4+dx.byteLength+dy.byteLength,dispose(){disposed=true;frame.width=frame.height=mask.width=mask.height=0;cells.length=0;},draw(ctx,seconds,view){
     if(disposed)return;
     if(view&&(view.x>right||view.y>bottom||view.x+view.width<left||view.y+view.height<top))return;
     const tick=Math.floor(seconds*30);

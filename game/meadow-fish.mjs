@@ -1,4 +1,4 @@
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.7';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.9';
 // Decorative fish swim beneath the static water surface and scenery.
 export function createMeadowFish({river,ground,atlas,world,water}){
   const W=world.width,H=world.height;
@@ -25,6 +25,7 @@ export function createMeadowFish({river,ground,atlas,world,water}){
   let cached=-1,disposed=false;
   if(!water)shared.dispose();
   return {
+    cacheBytes:()=>disposed?0:(mask.width*mask.height+frame.width*frame.height)*4,
     dispose(){disposed=true;mask.width=mask.height=frame.width=frame.height=0;fish.length=0;},
     positions(seconds){return fish.map(f=>{const p=pose(f,seconds);return {x:p.x,y:p.y};});},
     draw(ctx,seconds,view){

@@ -1,3 +1,4 @@
+import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.01.9';
 const terrainViews=new WeakMap();
 const staticGrounds=new WeakMap();
 
@@ -28,7 +29,8 @@ function drawStaticGround(ctx,image,world,view){
 }
 
 // Prepare outside the render loop, yielding between small row batches.
-export async function prepareTerrainTiles(image,world,{signal,onProgress=()=>{}}={}){
+export async function prepareTerrainTiles(image,world,{signal,onProgress=()=>{},view}={}){
+  if(world.renderCache==='chunks')return prepareChunkTerrain(image,world,view||{x:0,y:0,width:512,height:512},{signal,onProgress});
   const t=world.tileSize||32,cols=world.tileCols||world.cols;
   const canvas=document.createElement('canvas');canvas.width=world.width;canvas.height=world.height;
   const paint=canvas.getContext('2d');paint.imageSmoothingEnabled=false;
@@ -45,11 +47,13 @@ export async function prepareTerrainTiles(image,world,{signal,onProgress=()=>{}}
     onProgress(total,total);
   }catch(error){canvas.width=0;canvas.height=0;throw error;}
 }
-export function releaseTerrainTiles(world){for(const cache of [staticGrounds,terrainViews]){const value=cache.get(world);if(value){value.canvas.width=0;value.canvas.height=0;cache.delete(world);}}}
+export function releaseTerrainTiles(world){releaseChunkTerrain(world);for(const cache of [staticGrounds,terrainViews]){const value=cache.get(world);if(value){value.canvas.width=0;value.canvas.height=0;cache.delete(world);}}}
+export function terrainCacheStats(world){if(!world)return {bytes:0};if(world.renderCache==='chunks')return chunkTerrainStats(world);const c=staticGrounds.get(world)||terrainViews.get(world);return {kind:world.renderCache||'view',bytes:c?c.canvas.width*c.canvas.height*4:0};}
 
 // Assemble visible tiles at native resolution, then scale one continuous image.
 // This avoids per-tile sampling edges in mobile GPU canvas implementations.
 export function drawTerrainTiles(ctx,image,world,view){
+  if(world.renderCache==='chunks'){drawChunkTerrain(ctx,image,world,view);return;}
   if(world.renderCache==='static'||world.camp?.style==='night-camp'){drawStaticGround(ctx,image,world,view);return;}
   const t=world.tileSize||32,cols=world.tileCols||world.cols;
   const x0=Math.max(0,Math.floor(view.x/t)),y0=Math.max(0,Math.floor(view.y/t));

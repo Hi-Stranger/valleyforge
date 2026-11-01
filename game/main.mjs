@@ -1,30 +1,34 @@
-import {createSceneResources} from './scene-resources.mjs?v=2026.11.01.7';
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.7';
-import {mountRegionMap} from './region-map.mjs?v=2026.11.01.7';
-import {mountTownNavigation} from './town.mjs?v=2026.11.01.7';
-import {createTownCamp} from './town-camp.mjs?v=2026.11.01.7';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.01.7';
-import {mountFullscreen} from './fullscreen.mjs';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.01.7';
-import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs';
-import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs';
-import {createSwordVfx} from './sword-vfx.mjs';
-import {mountCharacterPanel} from './character-panel.mjs';
-import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.01.7';
-import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.01.7';
-import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles} from './terrain-tiles.mjs?v=2026.11.01.7';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.01.7';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.01.7';
+import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.01.9';
+import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.01.9';
+import {createSceneResources} from './scene-resources.mjs?v=2026.11.01.9';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.01.9';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.01.9';
+import {mountTownNavigation} from './town.mjs?v=2026.11.01.9';
+import {createTownCamp} from './town-camp.mjs?v=2026.11.01.9';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.01.9';
+import {mountFullscreen} from './fullscreen.mjs?v=2026.11.01.9';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.01.9';
+import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.01.9';
+import {SWORD_SKILLS,inSwordSector,inSwordPath} from './sword-skills.mjs?v=2026.11.01.9';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.01.9';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.01.9';
+import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.01.9';
+import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.01.9';
+import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.01.9';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.01.9';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.01.9';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.01.7';
-let pageDisposed=false,resourceStage='读取地图',prefetchTimer=0,featureGeneration=0;
+const GAME_VERSION='2026.11.01.9';
+let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
+const probe=createPerformanceProbe({enabled:new URLSearchParams(location.search).has('perf'),version:GAME_VERSION,snapshot:()=>({region:REGION,mode,phase,resources:resources.stats(),terrain:terrainCacheStats(world),effectPixelBytes:effectCacheBytes(),mineBattlePixelBytes:mineBattleGround?mineBattleGround.width*mineBattleGround.height*4:0,prefetch:prefetch?.stats()})});
+if(probe)window.__valleyPerformance={report:probe.report,reset:probe.reset};
 const QA=new URLSearchParams(location.search).has('qa');
 // Town is the safe starting hub; the meadow remains an independent encounter map.
 const requestedRegion=new URLSearchParams(location.search).get('region');
@@ -177,9 +181,9 @@ function clearActions(){swordFields.length=0;swordCast=null;releaseControls();qu
 function restoreBattleSkills(){for(const id of Object.keys(skillCooldowns))skillCooldowns[id]=0;player.heavyCooldown=0;player.rollCooldown=0;player.attackCooldown=0;queuedSword=null;queuedHeavy=0;}
 function beginEncounter(token){if(mode!=='exploration'||phase!=='playing'||encounter||encounterGrace>0)return;
   const theme=encounterTheme(token);
-  if((TOWN||MEADOW)&&!arenaImages[theme]){
+  if(!arenaImages[theme]||(MINE&&!mineBattleGround)){
     const generation=++featureGeneration;phase='preparing';clearActions();$('#loading').hidden=false;$('#loading-text').textContent='正在准备战斗场景…';$('#reload-btn').hidden=true;
-    const retry=()=>ensureArena(theme).then(()=>{if(pageDisposed||generation!==featureGeneration)return;$('#loading').hidden=true;phase='playing';beginEncounter(token);}).catch(error=>{if(pageDisposed||generation!==featureGeneration)return;$('#loading-text').textContent=error.message;$('#reload-btn').hidden=false;$('#reload-btn').onclick=()=>{$('#reload-btn').hidden=true;retry();};});
+    const retry=()=>ensureBattle(theme).then(()=>{if(pageDisposed||generation!==featureGeneration)return;$('#loading').hidden=true;phase='playing';beginEncounter(token);}).catch(error=>{if(pageDisposed||generation!==featureGeneration)return;$('#loading-text').textContent=error.message;$('#reload-btn').hidden=false;$('#reload-btn').onclick=()=>{$('#reload-btn').hidden=true;retry();};});
     retry();return;
   }
   encounter={token,theme,returnPoint:{x:player.x,y:player.y},worldLoot:loot.splice(0),entryTimer:.65,elapsed:0,settled:false,pending:{items:{},gold:0,xp:0,kills:{}}};
@@ -353,7 +357,7 @@ function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'
   camera.x=screenW/zoom>width?(width-screenW/zoom)/2:clamp(player.x-screenW/zoom/2,0,width-screenW/zoom);
   camera.y=screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*(TOWN?.84:.5),0,height-screenH/zoom);
   ctx.setTransform(zoom,0,0,zoom,-Math.round(camera.x*zoom)+(Math.random()-.5)*screenShake,-Math.round(camera.y*zoom)+(Math.random()-.5)*screenShake);
-  if(battle){if(MINE)ctx.drawImage(ground,world.bossPoint.x-380,world.bossPoint.y-190,760,380,0,0,ARENA.width,ARENA.height);else ctx.drawImage(arenaImages[encounter.theme],0,0);if(encounter.theme==='cave'){ctx.fillStyle='#10192440';ctx.fillRect(0,0,ARENA.width,ARENA.height);}ctx.strokeStyle='#d4c28b50';ctx.lineWidth=1;ctx.strokeRect(41,73,ARENA.width-82,ARENA.height-131);}
+  if(battle){if(MINE)ctx.drawImage(mineBattleGround,0,0,ARENA.width,ARENA.height);else ctx.drawImage(arenaImages[encounter.theme],0,0);if(encounter.theme==='cave'){ctx.fillStyle='#10192440';ctx.fillRect(0,0,ARENA.width,ARENA.height);}ctx.strokeStyle='#d4c28b50';ctx.lineWidth=1;ctx.strokeRect(41,73,ARENA.width-82,ARENA.height-131);}
   else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());townCamp?.drawGround(time);for(const o of world.groundObjects)sceneObject(o);worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
   for(const item of loot){shadow(item.x,item.y,7);const icon='icon:'+item.key;const f=world.atlas[icon];if(f){const scale=14/Math.max(f.w,f.h);ctx.drawImage(atlas,f.x,f.y,f.w,f.h,item.x-7,item.y-15+Math.sin(time*4)*2,f.w*scale,f.h*scale);}ctx.fillStyle=MATERIALS[item.key]?.color||'#e6c883';ctx.fillRect(item.x-1,item.y-23+Math.sin(time*4)*2,2,2);}
   if(battle){for(const e of enemies)if(e.boar)boarKingArt.ground(ctx,e);drawSwordEffects('ground');}
@@ -471,7 +475,7 @@ function bind(){new ResizeObserver(resize).observe(canvas);$('#start-btn').oncli
   canvas.addEventListener('pointerdown',e=>{if(mode!=='exploration'||e.button!==0||phase!=='playing'||modal||orientationBlocked)return;const r=canvas.getBoundingClientRect();e.preventDefault();canvas.focus({preventScroll:true});setWalkTarget((e.clientX-r.left)/zoom+camera.x,(e.clientY-r.top)/zoom+camera.y);});
   canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch'||joystick.active)return;pointer.touchAim=false;const r=canvas.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.active=true;});canvas.addEventListener('pointerdown',e=>{if(mode!=='battle'||e.button!==0||e.pointerType==='touch'||e.clientX<canvas.getBoundingClientRect().left+screenW/2)return;canvas.focus();attackPointer=e.pointerId;pointer.touchAim=false;pointer.down=true;pointer.active=e.pointerType!=='touch';attack();});window.addEventListener('pointerup',endAttackPointer);window.addEventListener('pointercancel',endAttackPointer);canvas.oncontextmenu=e=>e.preventDefault();
   document.querySelectorAll('[data-move]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);mobileKeys.add(b.dataset.move);pointer.active=false;};const up=()=>mobileKeys.delete(b.dataset.move);b.onpointerup=up;b.onpointercancel=up;});}
-function snapshot(){const enemyView=e=>({id:e.id,type:e.type,rank:e.rank,level:e.level,maxHp:e.maxHp,x:e.x,y:e.y,hp:e.hp,windup:e.windup,...(e.boar?{boar:{...e.boar}}:{})});return {version:GAME_VERSION,resources:resources.stats(),camp:TOWN?townCamp?.snapshot(time):undefined,ambientFish:meadowFish?.positions(time)||[],region:REGION,townShops:TOWN?world.shops:[],respawns:respawns.map(r=>({...r})),skills:{vfxStyle:'original-flat-v1',effectKinds:[...new Set(skillEffects.map(f=>f.id))],queued:queuedSword?.id??null,fields:swordFields.map(f=>({age:f.age,pulse:f.pulse})),cooldowns:{...skillCooldowns},active:swordCast?{id:swordCast.id,age:swordCast.age,pulse:swordCast.pulse}:null,uses:{...skillUses},effects:skillEffects.length},phase,mode,modal,walkPath:walkPath.map(p=>({...p})),orientationBlocked,attackHeld:pointer.down,joystick:{x:joystick.x,y:joystick.y,active:joystick.active,originX:joystick.originX,originY:joystick.originY},player:{x:player.x,y:player.y,hp:state.hp,stamina:player.stamina,roll:player.roll,heavyCooldown:player.heavyCooldown,rollCooldown:player.rollCooldown},stats:stats(state),bag:{...state.bag},bank:{...state.bank},owned:[...state.owned],equipped:{...state.equipped},kills:{...state.kills},quest:state.quest,gold:state.gold,potions:state.potions,enemies:(mode==='battle'?enemies:mapEnemies).map(enemyView),mapEnemies:mapEnemies.map(enemyView),encounter:encounter?{theme:encounter.theme,returnPoint:{...encounter.returnPoint},tokenId:encounter.token.id,settled:encounter.settled,pending:JSON.parse(JSON.stringify(encounter.pending))}:null,loot:loot.map(l=>({...l})),near:nearby()?.kind,lastPickup};}
+function snapshot(){const enemyView=e=>({id:e.id,type:e.type,rank:e.rank,level:e.level,maxHp:e.maxHp,x:e.x,y:e.y,hp:e.hp,windup:e.windup,...(e.boar?{boar:{...e.boar}}:{})});return {version:GAME_VERSION,resources:resources.stats(),terrain:terrainCacheStats(world),prefetch:prefetch?.stats(),camp:TOWN?townCamp?.snapshot(time):undefined,ambientFish:meadowFish?.positions(time)||[],region:REGION,townShops:TOWN?world.shops:[],respawns:respawns.map(r=>({...r})),skills:{vfxStyle:'original-flat-v1',effectKinds:[...new Set(skillEffects.map(f=>f.id))],queued:queuedSword?.id??null,fields:swordFields.map(f=>({age:f.age,pulse:f.pulse})),cooldowns:{...skillCooldowns},active:swordCast?{id:swordCast.id,age:swordCast.age,pulse:swordCast.pulse}:null,uses:{...skillUses},effects:skillEffects.length},phase,mode,modal,walkPath:walkPath.map(p=>({...p})),orientationBlocked,attackHeld:pointer.down,joystick:{x:joystick.x,y:joystick.y,active:joystick.active,originX:joystick.originX,originY:joystick.originY},player:{x:player.x,y:player.y,hp:state.hp,stamina:player.stamina,roll:player.roll,heavyCooldown:player.heavyCooldown,rollCooldown:player.rollCooldown},stats:stats(state),bag:{...state.bag},bank:{...state.bank},owned:[...state.owned],equipped:{...state.equipped},kills:{...state.kills},quest:state.quest,gold:state.gold,potions:state.potions,enemies:(mode==='battle'?enemies:mapEnemies).map(enemyView),mapEnemies:mapEnemies.map(enemyView),encounter:encounter?{theme:encounter.theme,returnPoint:{...encounter.returnPoint},tokenId:encounter.token.id,settled:encounter.settled,pending:JSON.parse(JSON.stringify(encounter.pending))}:null,loot:loot.map(l=>({...l})),near:nearby()?.kind,lastPickup};}
 function qaSetup(){window.__valleyforge={snapshot};if(!QA)return;window.__valleyQA={snapshot,walkTo(x,y){setWalkTarget(x,y);return snapshot();},navigation(){
     const cols=world.width/16,rows=world.height/16,start=[Math.floor(respawn.x/16),Math.floor(respawn.y/16)],seen=new Set([start.join(',')]),queue=[start];
     for(let head=0;head<queue.length;head++){const [x,y]=queue[head];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=`${nx},${ny}`;if(nx<1||nx>=cols-1||ny<1||ny>=rows-1||seen.has(k))continue;
@@ -488,14 +492,28 @@ function qaSetup(){window.__valleyforge={snapshot};if(!QA)return;window.__valley
     hitBoss(n=1,heavy=false){const e=enemies.find(isBoss);if(!e)throw Error('No boss');hitEnemy(e,n,heavy);renderUI();return snapshot();},
     step(seconds){if(!Number.isFinite(seconds)||seconds<0||seconds>30)throw Error('Invalid QA step');for(let elapsed=0;elapsed<seconds&&phase==='playing'&&!modal;elapsed+=.02)update(Math.min(.02,seconds-elapsed));renderUI();render();return snapshot();},
     trainingTarget(hp=100000){if(!Number.isFinite(hp)||hp<1||hp>1e8)throw Error("Invalid target health");for(const e of enemies)e.hp=e.maxHp=hp;renderUI();return snapshot();},configure(values){state=loadState(JSON.stringify({...state,...values}));state.hp=stats(state).maxHp;renderUI();persist();return snapshot();},open(type){openModal(type);return snapshot();},defeat(){for(const e of [...enemies])hitEnemy(e,1e8,true);return snapshot();},damage(n){hurtPlayer(n);return snapshot();},canStand:pointFree,readSave(){return JSON.parse(localStorage.getItem(SAVE_KEY));},aim(){if(enemies[0]){pointer.active=false;player.aim=Math.atan2(enemies[0].y-player.y,enemies[0].x-player.x);}return snapshot();}};}
+function effectCacheBytes(){return (townCamp?.cacheBytes?.()||0)+(meadowFish?.cacheBytes?.()||0)+(meadowRipples?.cacheBytes?.()||0);}
+function cachedPixelBytes(){return terrainCacheStats(world).bytes+effectCacheBytes()+(mineBattleGround?mineBattleGround.width*mineBattleGround.height*4:0);}
+async function ensureMineGround(){
+  if(mineBattleGround)return mineBattleGround;
+  if(!mineGroundTask)mineGroundTask=(async()=>{
+    const source=await resources.image('./game/assets/mine-ground.png');if(pageDisposed)throw new DOMException('场景已离开','AbortError');
+    const c=document.createElement('canvas');c.width=760;c.height=380;const paint=c.getContext('2d');paint.imageSmoothingEnabled=false;
+    paint.drawImage(source,world.bossPoint.x-380,world.bossPoint.y-190,760,380,0,0,760,380);
+    mineBattleGround=c;resources.releaseImage('./game/assets/mine-ground.png');return c;
+  })().catch(error=>{mineGroundTask=null;throw error;});
+  return mineGroundTask;
+}
+async function ensureBattle(theme){await Promise.all([ensureArena(theme),...(MINE?[ensureMineGround()]:[])]);}
 function ensureArena(theme){
   if(arenaImages[theme])return Promise.resolve(arenaImages[theme]);
   const file=MEADOW&&theme==='forest'?'arena-meadow':`arena-${theme}`;
   return resources.image(`./game/assets/${file}.png`).then(image=>{if(!pageDisposed)arenaImages[theme]=image;return image;});
 }
 function disposeScene(){
-  if(pageDisposed)return;pageDisposed=true;featureGeneration++;clearTimeout(prefetchTimer);sceneAbort.abort();
+  if(pageDisposed)return;pageDisposed=true;featureGeneration++;prefetch?.stop();probe?.dispose();sceneAbort.abort();
   meadowFish?.dispose?.();meadowRipples?.dispose?.();townCamp?.dispose?.();if(world)releaseTerrainTiles(world);
+  if(mineBattleGround)mineBattleGround.width=mineBattleGround.height=0;mineBattleGround=null;mineGroundTask=null;
   resources.dispose();for(const key of Object.keys(arenaImages))delete arenaImages[key];
   atlas=mini=ground=townAtlas=meadowAtlas=mineAtlas=boarKingArt=townCamp=meadowFish=meadowRipples=null;
 }
@@ -504,13 +522,13 @@ window.addEventListener('pageshow',()=>{last=performance.now();});
 async function load(){try{
   const loadImage=resources.image;
   world=await resources.json(`./game/assets/${REGION==='valley'?'world':REGION+'-world'}.json`);
-  resourceStage='加载并解码场景资源';
+  probe?.stage('map-ready');resourceStage='加载并解码场景资源';
   if(TOWN||MEADOW){
     world.renderCache='static';
     const required=[loadImage('./game/assets/sprites.png'),loadImage(`./game/assets/${REGION}-minimap.png`),loadImage(`./game/assets/${REGION}-atlas.png`)];
     if(MEADOW)required.push(loadImage('./game/assets/meadow-ground.png'),loadImage('./game/assets/meadow-river.png'),loadBoarKingArt(loadImage,GAME_VERSION));
     else required.push(...[...world.shops.map(shop=>`town-label-${shop.id}.png`),'town-nav-icons.png'].map(name=>loadImage('./game/assets/'+name)));
-    const images=await Promise.all(required);[atlas,mini]=images;
+    const images=await Promise.all(required);[atlas,mini]=images;probe?.stage('resources-ready');
     let terrainImage;
     if(TOWN){townAtlas=images[2];ground=mini;terrainImage=townAtlas;}
     else{meadowAtlas=images[2];ground=images[3];boarKingArt=images[5];terrainImage=meadowAtlas;}
@@ -525,16 +543,27 @@ async function load(){try{
       resources.releaseImage('./game/assets/meadow-ground.png');resources.releaseImage('./game/assets/meadow-river.png');ground=null;
       if(world.entry)Object.assign(gateway,world.entry);
     }
+  }else if(MINE){
+    world.renderCache='chunks';
+    [atlas,mini,mineAtlas]=await Promise.all([loadImage('./game/assets/sprites.png'),loadImage('./game/assets/mine-minimap.png'),loadImage('./game/assets/mine-tiles.png')]);
+    for(const [name,im] of await Promise.all(['golem','wolf'].map(async name=>[name,await loadImage('./game/assets/mine-'+name+'.png')]))){
+      const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const cc=c.getContext('2d');cc.drawImage(im,0,0);const data=cc.getImageData(0,0,c.width,c.height).data;let l=c.width,t=c.height,r=0,b=0;
+      for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(data[(y*c.width+x)*4+3]>64){l=Math.min(l,x);t=Math.min(t,y);r=Math.max(r,x);b=Math.max(b,y);}mineSprites[name]={im,x:l,y:t,w:r-l+1,h:b-t+1};c.width=c.height=0;
+    }
+    probe?.stage('resources-ready');buildCollision();
+    const saved=state.region===REGION&&state.position?state.position:world.entry,p=findFree(saved.x,saved.y,player.r),rect=canvas.getBoundingClientRect(),scale=clamp(rect.height/700,.65,1.15),width=rect.width/scale,height=rect.height/scale;
+    const view={x:clamp(p.x-width/2,0,Math.max(0,world.width-width)),y:clamp(p.y-height/2,0,Math.max(0,world.height-height)),width,height};
+    resourceStage='准备矿洞地面';await prepareTerrainTiles(mineAtlas,world,{signal:sceneAbort.signal,view,onProgress:(done,total)=>{$('#loading-text').textContent=`准备矿洞分块 · ${done}/${total}`;}});
+    if(world.entry)Object.assign(gateway,world.entry);
   }else{
-    [atlas,mini,boarKingArt]=await Promise.all([loadImage('./game/assets/sprites.png'),loadImage(`./game/assets/${REGION==='valley'?'minimap':REGION+'-minimap'}.png`),loadBoarKingArt(loadImage,GAME_VERSION)]);
-    ground=await loadImage('./game/assets/'+(MINE?'mine-ground.png':'ground.png'));
+    [atlas,mini]=await Promise.all([loadImage('./game/assets/sprites.png'),loadImage('./game/assets/minimap.png')]);
+    ground=await loadImage('./game/assets/ground.png');
     [arenaImages.forest,arenaImages.mountain,arenaImages.cave]=await Promise.all(['arena-forest.png','arena-mountain.png','arena-cave.png'].map(n=>loadImage('./game/assets/'+n)));
-    meadowAtlas=await loadImage('./game/assets/meadow-atlas.png');if(world.entry)Object.assign(gateway,world.entry);
+    if(world.entry)Object.assign(gateway,world.entry);
   }
-  if(MINE){mineAtlas=await loadImage('./game/assets/mine-tiles.png');for(const name of ['golem','wolf']){const im=await loadImage('./game/assets/mine-'+name+'.png');const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const cc=c.getContext('2d');cc.drawImage(im,0,0);const data=cc.getImageData(0,0,c.width,c.height).data;let l=c.width,t=c.height,r=0,b=0;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(data[(y*c.width+x)*4+3]>64){l=Math.min(l,x);t=Math.min(t,y);r=Math.max(r,x);b=Math.max(b,y);}mineSprites[name]={im,x:l,y:t,w:r-l+1,h:b-t+1};}}
-  if(world.entry)Object.assign(respawn,world.entry);buildCollision();const saved=state.region===REGION&&state.position?state.position:respawn;Object.assign(player,findFree(saved.x,saved.y,player.r));spawnWorld();bind();bindTouch();resize();phase=state.started?'playing':'ready';$('#intro').hidden=state.started;$('#loading').hidden=true;renderUI();qaSetup();if(state.started){questCheck();persist();}requestAnimationFrame(loop);
-  if(TOWN||MEADOW)prefetchTimer=setTimeout(()=>{if(!pageDisposed)ensureArena('forest').catch(()=>{});},1500);
+  if(world.entry)Object.assign(respawn,world.entry);if(!MINE)buildCollision();const saved=state.region===REGION&&state.position?state.position:respawn;Object.assign(player,findFree(saved.x,saved.y,player.r));spawnWorld();bind();bindTouch();resize();phase=state.started?'playing':'ready';$('#intro').hidden=state.started;$('#loading').hidden=true;renderUI();qaSetup();if(state.started){questCheck();persist();}requestAnimationFrame(loop);
+  probe?.stage('scene-ready');if(TOWN||MEADOW||MINE)prefetch=scheduleIdlePrefetch({resources,cacheBytes:cachedPixelBytes,load:()=>ensureArena('forest')});
 }catch(error){if(pageDisposed)return;console.error(error);$('#loading-text').textContent=error.message;$('#reload-btn').hidden=false;$('#reload-btn').onclick=()=>location.reload();}}
-function loop(t){if(pageDisposed)return;if(document.hidden){last=t;requestAnimationFrame(loop);return;}const dt=Math.min(.035,(t-last)/1000||.016);last=t;if(!orientationBlocked){if(phase==='entering')updateEntering(dt);else if(phase==='playing'&&(!modal||(modal==='map'&&mode==='exploration')))update(dt);}if(modal==='map'&&mode==='exploration'){const dot=$('.map-full .map-point');if(dot){dot.style.left=player.x/world.width*100+'%';dot.style.top=player.y/world.height*100+'%';}}render();requestAnimationFrame(loop);}
+function loop(t){if(pageDisposed)return;const frameStart=probe?performance.now():0;if(document.hidden){last=t;requestAnimationFrame(loop);return;}const dt=Math.min(.035,(t-last)/1000||.016);last=t;if(!orientationBlocked){if(phase==='entering')updateEntering(dt);else if(phase==='playing'&&(!modal||(modal==='map'&&mode==='exploration')))update(dt);}if(modal==='map'&&mode==='exploration'){const dot=$('.map-full .map-point');if(dot){dot.style.left=player.x/world.width*100+'%';dot.style.top=player.y/world.height*100+'%';}}render();if(probe)probe.frame(t,performance.now()-frameStart);requestAnimationFrame(loop);}
 mountPanelFit();
 load();
