@@ -1,3 +1,12 @@
+body:not(.in-battle) .ability-bar{display:none!important}
+body:not(.in-battle) #mobile-interact,#interact-prompt{display:none!important}
+#exit-guidance{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:18px;z-index:8}
+#exit-guidance[hidden]{display:none}
+.exit-guide{display:flex;align-items:center;gap:7px;min-height:44px;padding:0 4px;background:none;border:0;box-shadow:none;text-align:left;color:#ffdf98;touch-action:manipulation}
+.exit-guide svg{width:34px;height:34px;overflow:visible;filter:drop-shadow(2px 2px 0 #122215);shape-rendering:crispEdges;flex:none}
+.exit-guide span{font:600 12px/24px system-ui;letter-spacing:1px;text-shadow:1px 1px 0 #0b1911,-1px -1px 0 #0b1911;background:#10251bba;padding:0 7px;border-radius:2px;white-space:nowrap}
+.exit-guide:hover,.exit-guide:focus-visible{background:#10251b55;outline:1px solid #ffe4a0}
+.exit-guide[aria-pressed=true] span{color:#fff6cc;background:#3a432bd9}
 .ability-bar{width:255px;height:215px}
 .ability-bar .sword-skill{width:58px;height:58px;border-color:#92dbdfa8;background:#10333be8;box-shadow:inset 0 0 0 3px #27484b,2px 3px #0b1f1766}
 .ability-bar .sword-skill small{font-size:8px;position:relative;z-index:1;line-height:13px;white-space:nowrap}

@@ -1,0 +1,30 @@
+// Exit markers share world coordinates with the pathfinding destination.
+export function mountExitGuidance({container,point,side,destinations,onSelect}){
+  const nav=document.createElement('nav');
+  nav.id='exit-guidance';nav.hidden=true;nav.setAttribute('aria-label','出口目的地');
+  const buttons=destinations.map(([id,name])=>{
+    const button=document.createElement('button');button.type='button';button.dataset.destination=id;
+    button.className='exit-guide';button.setAttribute('aria-label',`前往${name}`);button.setAttribute('aria-pressed','false');
+    button.innerHTML='<svg viewBox="0 0 34 34" aria-hidden="true"><path d="M2 17L17 2H22V10H32V24H22V32H17Z" fill="#e6c475" stroke="#4c482a" stroke-width="2"/><path d="M6 17L19 5V13H29V20H19V28Z" fill="#ffe4a0"/></svg><span></span>';
+    button.querySelector('span').textContent=name;
+    button.onclick=()=>onSelect(id,name);nav.append(button);return button;
+  });
+  container.append(nav);
+  return {
+    show(visible){nav.hidden=!visible;},
+    update({camera,zoom,width,height,selected}){
+      const x=(point.x-camera.x)*zoom,y=(point.y-camera.y)*zoom;
+      const groupHeight=buttons.length*44+(buttons.length-1)*18;
+      const left=Math.max(12,Math.min(width-158,side==='left'?x-160:x+16));
+      const top=Math.max(124,Math.min(height-groupHeight-18,y-100));
+      nav.style.transform=`translate(${Math.round(left)}px,${Math.round(top)}px)`;
+      const outside=x<0||x>width||y<0||y>height;
+      const angle=outside?Math.atan2(y-height/2,x-width/2)-Math.PI:side==='left'?0:Math.PI;
+      for(const button of buttons){
+        button.querySelector('svg').style.transform=`rotate(${angle}rad)`;
+        button.setAttribute('aria-pressed',String(button.dataset.destination===selected));
+      }
+    },
+    dispose(){nav.remove();}
+  };
+}

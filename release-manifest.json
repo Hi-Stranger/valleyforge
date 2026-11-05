@@ -63,6 +63,7 @@
     "game/character.css",
     "game/chunk-terrain.mjs",
     "game/core.mjs",
+    "game/exit-guidance.mjs",
     "game/fullscreen.css",
     "game/fullscreen.mjs",
     "game/idle-prefetch.mjs",
