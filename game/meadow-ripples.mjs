@@ -1,4 +1,4 @@
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.03.2';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.05.2';
 // Local water undulation from the approved preview: no downstream scrolling.
 export function createMeadowRipples({river,ground,atlas,world,water}){
   const W=world.width,H=world.height,strength=2.3;

@@ -1,30 +1,30 @@
-import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.03.2';
-import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.03.2';
-import {createSceneResources} from './scene-resources.mjs?v=2026.11.03.2';
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.03.2';
-import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.03.2';
-import {mountRegionMap} from './region-map.mjs?v=2026.11.03.2';
-import {mountTownNavigation} from './town.mjs?v=2026.11.03.2';
-import {createTownCamp} from './town-camp.mjs?v=2026.11.03.2';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.03.2';
-import {mountFullscreen} from './fullscreen.mjs?v=2026.11.03.2';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.03.2';
-import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.03.2';
-import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.03.2';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.03.2';
-import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.03.2';
-import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.03.2';
-import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.03.2';
-import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.03.2';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.03.2';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.03.2';
+import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.05.2';
+import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.05.2';
+import {createSceneResources} from './scene-resources.mjs?v=2026.11.05.2';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.05.2';
+import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.05.2';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.05.2';
+import {mountTownNavigation} from './town.mjs?v=2026.11.05.2';
+import {createTownCamp} from './town-camp.mjs?v=2026.11.05.2';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.05.2';
+import {mountFullscreen} from './fullscreen.mjs?v=2026.11.05.2';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.05.2';
+import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.05.2';
+import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.05.2';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.05.2';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.05.2';
+import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.05.2';
+import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.05.2';
+import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.05.2';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.05.2';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.05.2';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.03.2';
+const GAME_VERSION='2026.11.05.2';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -34,6 +34,7 @@ const QA=new URLSearchParams(location.search).has('qa');
 // Town is the safe starting hub; the meadow remains an independent encounter map.
 const requestedRegion=new URLSearchParams(location.search).get('region');
 const REGION=['town','meadow','mine','valley'].includes(requestedRegion)?requestedRegion:'town';
+const travelSource=new URLSearchParams(location.search).get('from');
 const TOWN=REGION==='town';
 let townAtlas,townCamp,showTownNavigation=()=>{},shopFilter=null;
 const MINE=REGION==='mine',MEADOW=REGION==='meadow',FIELD=REGION!=='valley';
@@ -45,6 +46,9 @@ let world,ground,atlas,mini,boarKingArt,bossRandom=null,phase='loading',modal=nu
 let mode='exploration',encounter=null,encounterGrace=2;const arenaImages={};const mineSprites={};let mineAtlas,meadowAtlas,meadowFish,meadowRipples;
 const ARENA={width:960,height:480,obstacles:[{x:105,y:101,w:38,h:24},{x:793,y:375,w:31,h:24}]};
 let state;try{const raw=localStorage.getItem(SAVE_KEY);if(raw&&JSON.parse(raw)?.job&&!localStorage.getItem(SAVE_KEY+'-before-rpg-removal'))localStorage.setItem(SAVE_KEY+'-before-rpg-removal',raw);state=loadState(raw);}catch{state=newState();}
+// Older open pages and map bookmarks may omit `from`; the saved region still
+// identifies a real crossing. A new game and same-region reload keep their spawn.
+const arrivingFrom=['town','meadow','mine','valley'].includes(travelSource)&&travelSource!==REGION?travelSource:state.started&&state.region!==REGION?state.region:null;
 const player={x:2384,y:1072,r:8,stamina:100,aim:Math.PI,dir:'down',moving:false,invuln:0,attack:0,attackCooldown:0,heavyCooldown:0,roll:0,rollCooldown:0,rollAngle:0,charmBuff:0,lastHurt:-100};
 const camera={x:0,y:0};const keys=new Set();const mobileKeys=new Set();let pointer={down:false,active:false,x:0,y:0},swing=null,channel=0,screenShake=0,muted=true,audio=null,targetMarker=null,lastPickup='';
 let walkPath=[],walkRippleStart=-Infinity,explorationAction=null,exitGuidance=null,travelPending=false;
@@ -225,11 +229,20 @@ function rest(){state.hp=stats(state).maxHp;player.stamina=100;toast('在小镇�
 function nearby(){if(mode!=='exploration')return null;if(TOWN){const shop=world.shops.find(s=>distance(player,s)<85);if(shop)return {kind:'shop',shop,text:shop.name+' · 交互'};if(distance(player,world.exit)<100)return {kind:'town-exit',text:'前往溪畔原野 · 交互'};return null;}if(!TOWN&&distance(player,gateway)<95)return {kind:'town-entry',text:'世界旅行 / 返回溪谷镇 · 交互'};if(distance(player,smith)<78)return {kind:'smith',text:'铁匠老铎 · 打造与补给'};let best=null;
   for(const n of nodes){let d=distance(n,player);if(!n.respawn&&d<58&&(!best||d<best.d))best={kind:'node',node:n,d,text:(n.type==='wood'?'枯木':n.type==='iron'?'铁矿脉':'晶矿')+' · 采集材料'};}
   return best;}
-function travelRegion(region){if(!['town','meadow','mine','valley'].includes(region)||mode!=='exploration'||phase!=='playing'||modal||travelPending)return;if(distance(player,exitPoint())>34){toast('先到达区域出口再旅行',true);return;}travelPending=true;releaseControls();persist();const url=new URL(location.href);url.searchParams.set('region',region);location.assign(url.href);}
+function travelRegion(region){if(!['town','meadow','mine','valley'].includes(region)||region===REGION||mode!=='exploration'||phase!=='playing'||modal||travelPending)return;if(distance(player,exitPoint())>34){toast('先到达区域出口再旅行',true);return;}travelPending=true;releaseControls();persist();const url=new URL(location.href);url.searchParams.set('region',region);url.searchParams.set('from',REGION);location.assign(url.href);}
 function openTownShop(shop){shopFilter=['weapon','armor'].includes(shop.id)?shop.id:null;if(['forge','weapon','armor'].includes(shop.id)){openModal('forge');return;}openModal(shop.id==='potion'?'pharmacy':'goods');}
 function interact(){if(phase!=='playing'||modal||mode!=='exploration')return;const near=nearby();if(near?.kind==='shop'){openTownShop(near.shop);return;}if(near?.kind==='town-exit'){requestExplorationAction({kind:'travel',target:exitPoint(),region:'meadow',reach:24});return;}if(near?.kind==='town-entry'){requestExplorationAction({kind:'travel',target:exitPoint(),region:'town',reach:24});return;}if(near?.kind==='smith'){openModal('forge');return;}if(near?.kind==='node'){harvest(near.node);return;}if(safeZone()){rest();return;}toast('靠近铁匠或采集点按 E；靠近怪物会自动进入战斗');}
 function walkSegment(a,b){let previous=a;const steps=Math.max(1,Math.ceil(distance(a,b)/4));for(let i=1;i<=steps;i++){const next={x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps};if(!pointFree(next.x,next.y,player.r)||!transition(previous.x,previous.y,next.x,next.y))return false;previous=next;}return true;}
 function exitPoint(){return TOWN?world.exit:gateway;}
+function initialScenePosition(){
+  if(!arrivingFrom){const saved=state.region===REGION&&state.position?state.position:respawn;return findFree(saved.x,saved.y,player.r);}
+  // Each current region has one shared travel gate. Land inside that gate,
+  // clear of its buttons, rather than at the new-game or revival spawn.
+  const gate=TOWN?world.exit:world.entry||respawn;
+  const landing=TOWN?{dx:-224,dy:48,aim:Math.PI*.75}:MEADOW?{dx:48,dy:0,aim:0}:MINE?{dx:-64,dy:0,aim:Math.PI}:{dx:0,dy:0,aim:Math.PI};
+  const dir=Math.abs(Math.cos(landing.aim))>.65?'right':Math.sin(landing.aim)>0?'down':'up';
+  return {...findFree(gate.x+landing.dx,gate.y+landing.dy,player.r),aim:landing.aim,dir};
+}
 function routeTo(x,y){const goal=findFree(x,y,player.r);if(walkSegment(player,goal))return [goal];const route=pathTo(player,goal.x,goal.y,true);if(!route?.length||!walkSegment(player,route[0]))return [];if(walkSegment(route.at(-1),goal))route.push(goal);return route;}
 function setWalkTarget(x,y){explorationAction=null;walkPath=routeTo(x,y);if(!walkPath.length){toast('这里暂时无法到达，请点击附近道路');return false;}walkRippleStart=time;pointer.active=false;channel=0;return true;}
 function requestExplorationAction(action){
@@ -394,7 +407,7 @@ function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'
   zoom=battle?Math.max(.9,screenW/ARENA.width,screenH/ARENA.height):TOWN?clamp(Math.max(screenW/1536,screenH/1024),.36,1.45):MEADOW?clamp(screenH/720,.7,1.3):MINE?clamp(screenH/700,.65,1.15):clamp(screenH/300,1.15,2);
   camera.x=screenW/zoom>width?(width-screenW/zoom)/2:clamp(player.x-screenW/zoom/2,0,width-screenW/zoom);
   camera.y=screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*(TOWN?.84:.5),0,height-screenH/zoom);
-  if(mode==='exploration')exitGuidance?.update({camera,zoom,width:screenW,height:screenH,selected:explorationAction?.region});
+  if(mode==='exploration')exitGuidance?.update({camera,zoom,width:screenW,height:screenH,selected:explorationAction?.region,time});
   ctx.setTransform(zoom,0,0,zoom,-Math.round(camera.x*zoom)+(Math.random()-.5)*screenShake,-Math.round(camera.y*zoom)+(Math.random()-.5)*screenShake);
   if(battle){if(MINE)ctx.drawImage(mineBattleGround,0,0,ARENA.width,ARENA.height);else ctx.drawImage(arenaImages[encounter.theme],0,0);if(encounter.theme==='cave'){ctx.fillStyle='#10192440';ctx.fillRect(0,0,ARENA.width,ARENA.height);}ctx.strokeStyle='#d4c28b50';ctx.lineWidth=1;ctx.strokeRect(41,73,ARENA.width-82,ARENA.height-131);}
   else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());townCamp?.drawGround(time);for(const o of world.groundObjects)sceneObject(o);worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
@@ -561,6 +574,7 @@ window.addEventListener('pageshow',()=>{last=performance.now();});
 async function load(){try{
   const loadImage=resources.image;
   world=await resources.json(`./game/assets/${REGION==='valley'?'world':REGION+'-world'}.json`);
+  if(world.entry)Object.assign(respawn,world.entry);let startingPosition;
   probe?.stage('map-ready');resourceStage='加载并解码场景资源';
   if(TOWN||MEADOW){
     world.renderCache='static';
@@ -590,7 +604,7 @@ async function load(){try{
       for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(data[(y*c.width+x)*4+3]>64){l=Math.min(l,x);t=Math.min(t,y);r=Math.max(r,x);b=Math.max(b,y);}mineSprites[name]={im,x:l,y:t,w:r-l+1,h:b-t+1};c.width=c.height=0;
     }
     probe?.stage('resources-ready');buildCollision();
-    const saved=state.region===REGION&&state.position?state.position:world.entry,p=findFree(saved.x,saved.y,player.r),rect=canvas.getBoundingClientRect(),scale=clamp(rect.height/700,.65,1.15),width=rect.width/scale,height=rect.height/scale;
+    const p=startingPosition=initialScenePosition(),rect=canvas.getBoundingClientRect(),scale=clamp(rect.height/700,.65,1.15),width=rect.width/scale,height=rect.height/scale;
     const view={x:clamp(p.x-width/2,0,Math.max(0,world.width-width)),y:clamp(p.y-height/2,0,Math.max(0,world.height-height)),width,height};
     resourceStage='准备矿洞地面';await prepareTerrainTiles(mineAtlas,world,{signal:sceneAbort.signal,view,onProgress:(done,total)=>{$('#loading-text').textContent=`准备矿洞分块 · ${done}/${total}`;}});
     if(world.entry)Object.assign(gateway,world.entry);
@@ -600,9 +614,10 @@ async function load(){try{
     [arenaImages.forest,arenaImages.mountain,arenaImages.cave]=await Promise.all(['arena-forest.png','arena-mountain.png','arena-cave.png'].map(n=>loadImage('./game/assets/'+n)));
     if(world.entry)Object.assign(gateway,world.entry);
   }
-  if(world.entry)Object.assign(respawn,world.entry);if(!MINE)buildCollision();const saved=state.region===REGION&&state.position?state.position:respawn;Object.assign(player,findFree(saved.x,saved.y,player.r));spawnWorld();
+  if(!MINE){buildCollision();startingPosition=initialScenePosition();}Object.assign(player,startingPosition);spawnWorld();
   exitGuidance=mountExitGuidance({container:$('.world-panel'),point:exitPoint(),side:exitPoint().x<world.width/2?'left':'right',destinations:[['town','营地'],['meadow','溪畔原野'],['mine','废矿深窟']].filter(([id])=>id!==REGION),onSelect:region=>requestExplorationAction({kind:'travel',target:exitPoint(),region,reach:24})});
-  bind();bindTouch();resize();phase=state.started?'playing':'ready';$('#intro').hidden=state.started;$('#loading').hidden=true;renderUI();qaSetup();if(state.started){questCheck();persist();}requestAnimationFrame(loop);
+  bind();bindTouch();resize();phase=state.started?'playing':'ready';$('#intro').hidden=state.started;$('#loading').hidden=true;renderUI();qaSetup();if(state.started){questCheck();persist();}
+  if(arrivingFrom){const url=new URL(location.href);url.searchParams.delete('from');history.replaceState(history.state,'',url.href);}requestAnimationFrame(loop);
   probe?.stage('scene-ready');if(TOWN||MEADOW||MINE)prefetch=scheduleIdlePrefetch({resources,cacheBytes:cachedPixelBytes,load:()=>ensureArena('forest')});
 }catch(error){if(pageDisposed)return;console.error(error);$('#loading-text').textContent=error.message;$('#reload-btn').hidden=false;$('#reload-btn').onclick=()=>location.reload();}}
 function loop(t){if(pageDisposed)return;const frameStart=probe?performance.now():0;if(document.hidden){last=t;requestAnimationFrame(loop);return;}const dt=Math.min(.035,(t-last)/1000||.016);last=t;if(!orientationBlocked){if(phase==='entering')updateEntering(dt);else if(phase==='playing'&&(!modal||(modal==='map'&&mode==='exploration')))update(dt);}if(modal==='map'&&mode==='exploration'){const dot=$('.map-full .map-point');if(dot){dot.style.left=player.x/world.width*100+'%';dot.style.top=player.y/world.height*100+'%';}}render();if(probe)probe.frame(t,performance.now()-frameStart);requestAnimationFrame(loop);}
