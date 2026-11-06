@@ -1,30 +1,30 @@
-import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.05.2';
-import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.05.2';
-import {createSceneResources} from './scene-resources.mjs?v=2026.11.05.2';
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.05.2';
-import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.05.2';
-import {mountRegionMap} from './region-map.mjs?v=2026.11.05.2';
-import {mountTownNavigation} from './town.mjs?v=2026.11.05.2';
-import {createTownCamp} from './town-camp.mjs?v=2026.11.05.2';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.05.2';
-import {mountFullscreen} from './fullscreen.mjs?v=2026.11.05.2';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.05.2';
-import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.05.2';
-import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.05.2';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.05.2';
-import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.05.2';
-import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.05.2';
-import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.05.2';
-import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.05.2';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.05.2';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.05.2';
+import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.06.1';
+import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.06.1';
+import {createSceneResources} from './scene-resources.mjs?v=2026.11.06.1';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.06.1';
+import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.06.1';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.06.1';
+import {mountTownNavigation} from './town.mjs?v=2026.11.06.1';
+import {createTownCamp} from './town-camp.mjs?v=2026.11.06.1';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.06.1';
+import {mountFullscreen} from './fullscreen.mjs?v=2026.11.06.1';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.06.1';
+import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.06.1';
+import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.06.1';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.1';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.06.1';
+import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.06.1';
+import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.06.1';
+import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.06.1';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.06.1';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.06.1';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.05.2';
+const GAME_VERSION='2026.11.06.1';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -338,8 +338,10 @@ function sceneObject(o){if(!sceneVisible(o))return;if(TOWN&&townCamp?.drawObject
   const fade=o.depth>player.y&&player.x>left-8&&player.x<left+box.w*o.scale+8&&player.y-15>top&&player.y-15<top+box.h*(o.scaleY||o.scale);
   if(o.rotation){ctx.save();ctx.translate(o.x,o.y+box.h*(o.scaleY||o.scale));ctx.rotate(o.rotation*Math.PI/180);drawFrame(f.key,0,-box.h*(o.scaleY||o.scale),o.scale,false,fade?.38:1,o.scaleY||o.scale);ctx.restore();}else drawFrame(f.key,o.x,o.y,o.scale,false,fade?.38:1,o.scaleY||o.scale);}
 // Exploration multipliers relative to the original sizes; battles keep original sizes.
+function meadowExplorationZoom(){return clamp(screenH/720,.7,1.3);}
 const ACTOR_SCALE={
-  get player(){return mode==='battle'?1:TOWN?2.5:1.75;},
+  // Match meadow screen size while preserving each exploration map's camera.
+  get player(){return mode==='battle'?1:TOWN?2.5:MEADOW?1.75:1.75*meadowExplorationZoom()/zoom;},
   get slime(){return mode==='battle'?1:1.5;},
   get boar(){return mode==='battle'?1:1.4;},
 };
@@ -404,7 +406,7 @@ function drawMapEnemy(e){if(MEADOW&&e.type==='boss'){drawBoarKing(e,true);return
 function renderCharacterPreview(stamp){if(!orientationBlocked&&(modal==='character'||modal==='training')&&characterPreview&&stamp+.2>=previewRenderedAt){previewRenderedAt=Math.max(previewRenderedAt+1000/30,stamp);characterPreview(stamp/1000);}}
 function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'&&phase==='playing'&&!modal&&!orientationBlocked);exitGuidance?.show(mode==='exploration'&&phase==='playing'&&!modal&&!orientationBlocked&&!travelPending);const stamp=performance.now(),frozen=orientationBlocked||!!(modal&&!(modal==='map'&&mode==='exploration'))||!['playing','entering'].includes(phase),key=`${mode}:${phase}:${modal}:${screenW}:${screenH}`;if(frozen&&frozenSceneKey===key&&!sceneDirty){renderCharacterPreview(stamp);return;}frozenSceneKey=frozen?key:null;sceneDirty=false;ctx.imageSmoothingEnabled=false;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=mode==='battle'?'#0d1917':'#162a1d';ctx.fillRect(0,0,screenW,screenH);
   const battle=mode==='battle',width=battle?ARENA.width:world.width,height=battle?ARENA.height:world.height;
-  zoom=battle?Math.max(.9,screenW/ARENA.width,screenH/ARENA.height):TOWN?clamp(Math.max(screenW/1536,screenH/1024),.36,1.45):MEADOW?clamp(screenH/720,.7,1.3):MINE?clamp(screenH/700,.65,1.15):clamp(screenH/300,1.15,2);
+  zoom=battle?Math.max(.9,screenW/ARENA.width,screenH/ARENA.height):TOWN?clamp(Math.max(screenW/1536,screenH/1024),.36,1.45):MEADOW?meadowExplorationZoom():MINE?clamp(screenH/700,.65,1.15):clamp(screenH/300,1.15,2);
   camera.x=screenW/zoom>width?(width-screenW/zoom)/2:clamp(player.x-screenW/zoom/2,0,width-screenW/zoom);
   camera.y=screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*(TOWN?.84:.5),0,height-screenH/zoom);
   if(mode==='exploration')exitGuidance?.update({camera,zoom,width:screenW,height:screenH,selected:explorationAction?.region,time});
