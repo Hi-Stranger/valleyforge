@@ -1,4 +1,4 @@
-import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.06.2';
+import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.06.3';
 const terrainViews=new WeakMap();
 const staticGrounds=new WeakMap();
 

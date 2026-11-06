@@ -1,6 +1,6 @@
-import {SWORD_SKILLS} from './sword-skills.mjs?v=2026.11.06.2';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.2';
-import {drawPlayerPortrait} from './character-art.mjs?v=2026.11.06.2';
+import {SWORD_SKILLS} from './sword-skills.mjs?v=2026.11.06.3';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.3';
+import {drawPlayerPortrait} from './character-art.mjs?v=2026.11.06.3';
 
 const DETAILS={
   triple:{tags:['三段追击','末段打断'],damage:'三段：攻击力 × 1 / 1 / 1.5',desc:'连续挥出三段剑光，逐段向前追击，最后一击可打断敌人蓄力。'},

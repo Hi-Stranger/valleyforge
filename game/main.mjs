@@ -1,31 +1,31 @@
-import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.06.2';
-import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.06.2';
-import {createSceneResources} from './scene-resources.mjs?v=2026.11.06.2';
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.06.2';
-import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.06.2';
-import {mountRegionMap} from './region-map.mjs?v=2026.11.06.2';
-import {mountTownNavigation} from './town.mjs?v=2026.11.06.2';
-import {createTownCamp} from './town-camp.mjs?v=2026.11.06.2';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.06.2';
-import {mountFullscreen} from './fullscreen.mjs?v=2026.11.06.2';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.06.2';
-import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.06.2';
-import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.06.2';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.2';
-import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.06.2';
-import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.06.2';
-import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.06.2';
-import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.06.2';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.06.2';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.06.2';
-import {loadCharacterArt,drawPlayerPortrait} from './character-art.mjs?v=2026.11.06.2';
+import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.06.3';
+import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.06.3';
+import {createSceneResources} from './scene-resources.mjs?v=2026.11.06.3';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.06.3';
+import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.06.3';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.06.3';
+import {mountTownNavigation} from './town.mjs?v=2026.11.06.3';
+import {createTownCamp} from './town-camp.mjs?v=2026.11.06.3';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.06.3';
+import {mountFullscreen} from './fullscreen.mjs?v=2026.11.06.3';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.06.3';
+import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.06.3';
+import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.06.3';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.3';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.06.3';
+import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.06.3';
+import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.06.3';
+import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.06.3';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.06.3';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.06.3';
+import {loadCharacterArt,drawPlayerPortrait} from './character-art.mjs?v=2026.11.06.3';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.06.2';
+const GAME_VERSION='2026.11.06.3';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -340,9 +340,10 @@ function sceneObject(o){if(!sceneVisible(o))return;if(TOWN&&townCamp?.drawObject
   if(o.rotation){ctx.save();ctx.translate(o.x,o.y+box.h*(o.scaleY||o.scale));ctx.rotate(o.rotation*Math.PI/180);drawFrame(f.key,0,-box.h*(o.scaleY||o.scale),o.scale,false,fade?.38:1,o.scaleY||o.scale);ctx.restore();}else drawFrame(f.key,o.x,o.y,o.scale,false,fade?.38:1,o.scaleY||o.scale);}
 // A common screen-space body height for town and outdoor exploration.
 function meadowExplorationZoom(){return clamp(screenH/720,.7,1.3);}
+const EXPLORATION_ACTOR_SCALE=2.625; // Confirmed 1.5x enlargement of the 1.75 baseline.
 const ACTOR_SCALE={
   // Match meadow screen size while preserving each exploration map's camera.
-  get player(){return mode==='battle'?1:MEADOW?1.75:1.75*meadowExplorationZoom()/zoom;},
+  get player(){return mode==='battle'?1:MEADOW?EXPLORATION_ACTOR_SCALE:EXPLORATION_ACTOR_SCALE*meadowExplorationZoom()/zoom;},
   get slime(){return mode==='battle'?1:1.5;},
   get boar(){return mode==='battle'?1:1.4;},
 };
@@ -594,7 +595,7 @@ async function load(){try{
     else{meadowAtlas=images[2];ground=images[3];boarKingArt=images[5];terrainImage=meadowAtlas;}
     resourceStage='准备静态地面';
     await prepareTerrainTiles(terrainImage,world,{signal:sceneAbort.signal,onProgress:(done,total)=>{$('#loading-text').textContent=`准备静态地面 · ${done}/${total}`;}});
-    if(TOWN){townCamp=createTownCamp({ctx,world,image:townAtlas,npcImage:characterArt.npcImage,npcScale:()=>33*1.75*meadowExplorationZoom()/(40*zoom),visible});Object.assign(smith,world.shops[0]);showTownNavigation=mountTownNavigation(world.shops,shop=>{if(phase!=='playing'||modal||orientationBlocked)return false;setWalkTarget(shop.x,shop.y);if(!walkPath.length)return false;targetMarker={...shop,label:shop.name};canvas.focus();return true;},GAME_VERSION);}
+    if(TOWN){townCamp=createTownCamp({ctx,world,image:townAtlas,npcImage:characterArt.npcImage,npcScale:()=>33*EXPLORATION_ACTOR_SCALE*meadowExplorationZoom()/(40*zoom),visible});Object.assign(smith,world.shops[0]);showTownNavigation=mountTownNavigation(world.shops,shop=>{if(phase!=='playing'||modal||orientationBlocked)return false;setWalkTarget(shop.x,shop.y);if(!walkPath.length)return false;targetMarker={...shop,label:shop.name};canvas.focus();return true;},GAME_VERSION);}
     else{
       resourceStage='准备水面与游鱼';$('#loading-text').textContent=resourceStage;await new Promise(resolve=>setTimeout(resolve,0));
       const water=prepareMeadowWater({river:images[4],ground,atlas:meadowAtlas,world});

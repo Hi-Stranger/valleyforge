@@ -1,4 +1,4 @@
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.06.2';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.06.3';
 // Decorative fish swim beneath the static water surface and scenery.
 export function createMeadowFish({river,ground,atlas,world,water}){
   const W=world.width,H=world.height;
