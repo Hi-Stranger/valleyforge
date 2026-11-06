@@ -1,0 +1,1109 @@
+{
+  "id": "leather-swordsman-b",
+  "cell": 96,
+  "foot": 82,
+  "frames": {
+    "player-b:0:0": {
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:0:1": {
+      "x": 96,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:0:2": {
+      "x": 192,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:0:3": {
+      "x": 288,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:0:4": {
+      "x": 384,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 38,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:0:5": {
+      "x": 480,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:1:0": {
+      "x": 0,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:1:1": {
+      "x": 96,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:1:2": {
+      "x": 192,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 36,
+        "y": 42,
+        "w": 23,
+        "h": 40
+      }
+    },
+    "player-b:1:3": {
+      "x": 288,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 38,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:1:4": {
+      "x": 384,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 36,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:1:5": {
+      "x": 480,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:2:0": {
+      "x": 0,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 21,
+        "h": 40
+      }
+    },
+    "player-b:2:1": {
+      "x": 96,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 21,
+        "h": 40
+      }
+    },
+    "player-b:2:2": {
+      "x": 192,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 21,
+        "h": 40
+      }
+    },
+    "player-b:2:3": {
+      "x": 288,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:2:4": {
+      "x": 384,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 39,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:2:5": {
+      "x": 480,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:3:0": {
+      "x": 0,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 35,
+        "y": 41,
+        "w": 26,
+        "h": 41
+      }
+    },
+    "player-b:3:1": {
+      "x": 96,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 31,
+        "y": 41,
+        "w": 30,
+        "h": 41
+      }
+    },
+    "player-b:3:2": {
+      "x": 192,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 29,
+        "y": 41,
+        "w": 31,
+        "h": 41
+      }
+    },
+    "player-b:3:3": {
+      "x": 288,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 29,
+        "y": 42,
+        "w": 30,
+        "h": 40
+      }
+    },
+    "player-b:3:4": {
+      "x": 384,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 33,
+        "y": 41,
+        "w": 31,
+        "h": 41
+      }
+    },
+    "player-b:3:5": {
+      "x": 480,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 34,
+        "y": 42,
+        "w": 28,
+        "h": 40
+      }
+    },
+    "player-b:4:0": {
+      "x": 0,
+      "y": 384,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 36,
+        "y": 42,
+        "w": 25,
+        "h": 40
+      }
+    },
+    "player-b:4:1": {
+      "x": 96,
+      "y": 384,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 36,
+        "y": 40,
+        "w": 28,
+        "h": 42
+      }
+    },
+    "player-b:4:2": {
+      "x": 192,
+      "y": 384,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 36,
+        "y": 41,
+        "w": 38,
+        "h": 41
+      }
+    },
+    "player-b:4:3": {
+      "x": 288,
+      "y": 384,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 25,
+        "y": 42,
+        "w": 49,
+        "h": 41
+      }
+    },
+    "player-b:4:4": {
+      "x": 384,
+      "y": 384,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 35,
+        "y": 41,
+        "w": 33,
+        "h": 41
+      }
+    },
+    "player-b:4:5": {
+      "x": 480,
+      "y": 384,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 34,
+        "y": 41,
+        "w": 26,
+        "h": 41
+      }
+    },
+    "player-b:5:0": {
+      "x": 0,
+      "y": 480,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    },
+    "player-b:5:1": {
+      "x": 96,
+      "y": 480,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 34,
+        "y": 41,
+        "w": 27,
+        "h": 41
+      }
+    },
+    "player-b:5:2": {
+      "x": 192,
+      "y": 480,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 39,
+        "y": 42,
+        "w": 35,
+        "h": 40
+      }
+    },
+    "player-b:5:3": {
+      "x": 288,
+      "y": 480,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 39,
+        "y": 41,
+        "w": 33,
+        "h": 41
+      }
+    },
+    "player-b:5:4": {
+      "x": 384,
+      "y": 480,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 38,
+        "y": 41,
+        "w": 32,
+        "h": 41
+      }
+    },
+    "player-b:5:5": {
+      "x": 480,
+      "y": 480,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 0.5,
+      "bodyHeight": 40,
+      "bodyTop": 42,
+      "bounds": {
+        "x": 37,
+        "y": 42,
+        "w": 22,
+        "h": 40
+      }
+    }
+  },
+  "clips": {
+    "player.idle.down": [
+      "player-b:0:0",
+      "player-b:0:1"
+    ],
+    "player.walk.down": [
+      "player-b:0:2",
+      "player-b:0:3",
+      "player-b:0:4",
+      "player-b:0:5"
+    ],
+    "player.attack.down": [
+      "player-b:3:0",
+      "player-b:3:1",
+      "player-b:3:2",
+      "player-b:3:3",
+      "player-b:3:4",
+      "player-b:3:5"
+    ],
+    "player.idle.up": [
+      "player-b:1:0",
+      "player-b:1:1"
+    ],
+    "player.walk.up": [
+      "player-b:1:2",
+      "player-b:1:3",
+      "player-b:1:4",
+      "player-b:1:5"
+    ],
+    "player.attack.up": [
+      "player-b:4:0",
+      "player-b:4:1",
+      "player-b:4:2",
+      "player-b:4:3",
+      "player-b:4:4",
+      "player-b:4:5"
+    ],
+    "player.idle.right": [
+      "player-b:2:0",
+      "player-b:2:1"
+    ],
+    "player.walk.right": [
+      "player-b:2:2",
+      "player-b:2:3",
+      "player-b:2:4",
+      "player-b:2:5"
+    ],
+    "player.attack.right": [
+      "player-b:5:0",
+      "player-b:5:1",
+      "player-b:5:2",
+      "player-b:5:3",
+      "player-b:5:4",
+      "player-b:5:5"
+    ]
+  },
+  "measurements": [
+    {
+      "key": "player-b:0:0",
+      "source": {
+        "left": 90,
+        "top": 31,
+        "right": 184,
+        "bottom": 204,
+        "bodyTop": 31
+      },
+      "targetHeight": 40,
+      "scale": 0.22988505747126436
+    },
+    {
+      "key": "player-b:0:1",
+      "source": {
+        "left": 285,
+        "top": 30,
+        "right": 381,
+        "bottom": 204,
+        "bodyTop": 30
+      },
+      "targetHeight": 40,
+      "scale": 0.22857142857142856
+    },
+    {
+      "key": "player-b:0:2",
+      "source": {
+        "left": 481,
+        "top": 32,
+        "right": 576,
+        "bottom": 205,
+        "bodyTop": 32
+      },
+      "targetHeight": 40,
+      "scale": 0.22988505747126436
+    },
+    {
+      "key": "player-b:0:3",
+      "source": {
+        "left": 677,
+        "top": 32,
+        "right": 773,
+        "bottom": 205,
+        "bodyTop": 32
+      },
+      "targetHeight": 40,
+      "scale": 0.22988505747126436
+    },
+    {
+      "key": "player-b:0:4",
+      "source": {
+        "left": 874,
+        "top": 31,
+        "right": 968,
+        "bottom": 205,
+        "bodyTop": 31
+      },
+      "targetHeight": 40,
+      "scale": 0.22857142857142856
+    },
+    {
+      "key": "player-b:0:5",
+      "source": {
+        "left": 1071,
+        "top": 31,
+        "right": 1164,
+        "bottom": 204,
+        "bodyTop": 31
+      },
+      "targetHeight": 40,
+      "scale": 0.22988505747126436
+    },
+    {
+      "key": "player-b:1:0",
+      "source": {
+        "left": 90,
+        "top": 237,
+        "right": 184,
+        "bottom": 408,
+        "bodyTop": 237
+      },
+      "targetHeight": 40,
+      "scale": 0.23255813953488372
+    },
+    {
+      "key": "player-b:1:1",
+      "source": {
+        "left": 286,
+        "top": 236,
+        "right": 380,
+        "bottom": 409,
+        "bodyTop": 236
+      },
+      "targetHeight": 40,
+      "scale": 0.22988505747126436
+    },
+    {
+      "key": "player-b:1:2",
+      "source": {
+        "left": 481,
+        "top": 238,
+        "right": 577,
+        "bottom": 409,
+        "bodyTop": 238
+      },
+      "targetHeight": 40,
+      "scale": 0.23255813953488372
+    },
+    {
+      "key": "player-b:1:3",
+      "source": {
+        "left": 678,
+        "top": 237,
+        "right": 773,
+        "bottom": 408,
+        "bodyTop": 237
+      },
+      "targetHeight": 40,
+      "scale": 0.23255813953488372
+    },
+    {
+      "key": "player-b:1:4",
+      "source": {
+        "left": 874,
+        "top": 238,
+        "right": 969,
+        "bottom": 410,
+        "bodyTop": 238
+      },
+      "targetHeight": 40,
+      "scale": 0.23121387283236994
+    },
+    {
+      "key": "player-b:1:5",
+      "source": {
+        "left": 1070,
+        "top": 236,
+        "right": 1165,
+        "bottom": 408,
+        "bodyTop": 236
+      },
+      "targetHeight": 40,
+      "scale": 0.23121387283236994
+    },
+    {
+      "key": "player-b:2:0",
+      "source": {
+        "left": 89,
+        "top": 445,
+        "right": 177,
+        "bottom": 612,
+        "bodyTop": 445
+      },
+      "targetHeight": 40,
+      "scale": 0.23809523809523808
+    },
+    {
+      "key": "player-b:2:1",
+      "source": {
+        "left": 288,
+        "top": 445,
+        "right": 376,
+        "bottom": 612,
+        "bodyTop": 445
+      },
+      "targetHeight": 40,
+      "scale": 0.23809523809523808
+    },
+    {
+      "key": "player-b:2:2",
+      "source": {
+        "left": 483,
+        "top": 445,
+        "right": 571,
+        "bottom": 612,
+        "bodyTop": 445
+      },
+      "targetHeight": 40,
+      "scale": 0.23809523809523808
+    },
+    {
+      "key": "player-b:2:3",
+      "source": {
+        "left": 680,
+        "top": 446,
+        "right": 769,
+        "bottom": 612,
+        "bodyTop": 446
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    },
+    {
+      "key": "player-b:2:4",
+      "source": {
+        "left": 875,
+        "top": 445,
+        "right": 964,
+        "bottom": 611,
+        "bodyTop": 445
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    },
+    {
+      "key": "player-b:2:5",
+      "source": {
+        "left": 1071,
+        "top": 446,
+        "right": 1160,
+        "bottom": 611,
+        "bodyTop": 446
+      },
+      "targetHeight": 40,
+      "scale": 0.24096385542168675
+    },
+    {
+      "key": "player-b:3:0",
+      "source": {
+        "left": 75,
+        "top": 648,
+        "right": 184,
+        "bottom": 818,
+        "bodyTop": 652
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    },
+    {
+      "key": "player-b:3:1",
+      "source": {
+        "left": 266,
+        "top": 649,
+        "right": 391,
+        "bottom": 818,
+        "bodyTop": 653
+      },
+      "targetHeight": 40,
+      "scale": 0.24096385542168675
+    },
+    {
+      "key": "player-b:3:2",
+      "source": {
+        "left": 454,
+        "top": 649,
+        "right": 582,
+        "bottom": 818,
+        "bodyTop": 652
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    },
+    {
+      "key": "player-b:3:3",
+      "source": {
+        "left": 649,
+        "top": 652,
+        "right": 771,
+        "bottom": 818,
+        "bodyTop": 654
+      },
+      "targetHeight": 40,
+      "scale": 0.24242424242424243
+    },
+    {
+      "key": "player-b:3:4",
+      "source": {
+        "left": 845,
+        "top": 654,
+        "right": 968,
+        "bottom": 816,
+        "bodyTop": 657
+      },
+      "targetHeight": 40,
+      "scale": 0.25
+    },
+    {
+      "key": "player-b:3:5",
+      "source": {
+        "left": 1058,
+        "top": 652,
+        "right": 1171,
+        "bottom": 818,
+        "bodyTop": 654
+      },
+      "targetHeight": 40,
+      "scale": 0.24242424242424243
+    },
+    {
+      "key": "player-b:4:0",
+      "source": {
+        "left": 91,
+        "top": 852,
+        "right": 192,
+        "bottom": 1016,
+        "bodyTop": 853
+      },
+      "targetHeight": 40,
+      "scale": 0.24390243902439024
+    },
+    {
+      "key": "player-b:4:1",
+      "source": {
+        "left": 284,
+        "top": 845,
+        "right": 398,
+        "bottom": 1016,
+        "bodyTop": 855
+      },
+      "targetHeight": 40,
+      "scale": 0.24691358024691357
+    },
+    {
+      "key": "player-b:4:2",
+      "source": {
+        "left": 475,
+        "top": 852,
+        "right": 626,
+        "bottom": 1012,
+        "bodyTop": 854
+      },
+      "targetHeight": 40,
+      "scale": 0.25157232704402516
+    },
+    {
+      "key": "player-b:4:3",
+      "source": {
+        "left": 627,
+        "top": 853,
+        "right": 821,
+        "bottom": 1014,
+        "bodyTop": 855
+      },
+      "targetHeight": 40,
+      "scale": 0.25
+    },
+    {
+      "key": "player-b:4:4",
+      "source": {
+        "left": 879,
+        "top": 854,
+        "right": 1010,
+        "bottom": 1014,
+        "bodyTop": 856
+      },
+      "targetHeight": 40,
+      "scale": 0.25157232704402516
+    },
+    {
+      "key": "player-b:4:5",
+      "source": {
+        "left": 1071,
+        "top": 854,
+        "right": 1174,
+        "bottom": 1016,
+        "bodyTop": 857
+      },
+      "targetHeight": 40,
+      "scale": 0.25
+    },
+    {
+      "key": "player-b:5:0",
+      "source": {
+        "left": 85,
+        "top": 1054,
+        "right": 176,
+        "bottom": 1225,
+        "bodyTop": 1056
+      },
+      "targetHeight": 40,
+      "scale": 0.23529411764705882
+    },
+    {
+      "key": "player-b:5:1",
+      "source": {
+        "left": 267,
+        "top": 1052,
+        "right": 377,
+        "bottom": 1222,
+        "bodyTop": 1056
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    },
+    {
+      "key": "player-b:5:2",
+      "source": {
+        "left": 473,
+        "top": 1054,
+        "right": 618,
+        "bottom": 1222,
+        "bodyTop": 1056
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    },
+    {
+      "key": "player-b:5:3",
+      "source": {
+        "left": 671,
+        "top": 1057,
+        "right": 805,
+        "bottom": 1222,
+        "bodyTop": 1060
+      },
+      "targetHeight": 40,
+      "scale": 0.24539877300613497
+    },
+    {
+      "key": "player-b:5:4",
+      "source": {
+        "left": 866,
+        "top": 1057,
+        "right": 997,
+        "bottom": 1222,
+        "bodyTop": 1060
+      },
+      "targetHeight": 40,
+      "scale": 0.24539877300613497
+    },
+    {
+      "key": "player-b:5:5",
+      "source": {
+        "left": 1072,
+        "top": 1058,
+        "right": 1162,
+        "bottom": 1225,
+        "bodyTop": 1059
+      },
+      "targetHeight": 40,
+      "scale": 0.23952095808383234
+    }
+  ]
+}

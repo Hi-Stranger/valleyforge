@@ -9,7 +9,7 @@ export function campPosesAt(time){
   return {smith:SMITH_STOPS.findIndex(v=>t%1.5<v),mage:Math.floor(t%3/3*8),hero:HERO_STOPS.findIndex(v=>t<v)};
 }
 
-export function createTownCamp({ctx,world,image,visible}){
+export function createTownCamp({ctx,world,image,npcImage,npcScale=()=>1,visible}){
   const stamps=new Map();
   const stampTransform=new DOMMatrix();
   // Fixed lights retain native-sized gradients; variable smoke scales one stamp.
@@ -33,12 +33,14 @@ export function createTownCamp({ctx,world,image,visible}){
   }
   function frame(key,x,y,scale){
     const f=world.atlas[key];
-    ctx.drawImage(image,f.x,f.y,f.w,f.h,Math.round(x+f.ox*scale),Math.round(y+f.oy*scale),Math.round(f.w*scale),Math.round(f.h*scale));
+    const updated=key.startsWith('camp-v2:');if(updated)scale=npcScale();
+    ctx.drawImage(updated?npcImage:image,f.x,f.y,f.w,f.h,Math.round(x+f.ox*scale),Math.round(y+f.oy*scale),Math.round(f.w*scale),Math.round(f.h*scale));
   }
   function drawObject(o,time){
     if(o.custom!=='camp-actor')return false;
     const actor=world.campActors[o.actor];
-    frame(actor.frames[campPosesAt(time)[o.actor]],o.x,o.y,actor.scale);
+    const pose=campPosesAt(time)[o.actor]??Math.floor(time*2)%actor.frames.length;
+    frame(actor.frames[pose],o.x,o.y,actor.scale);
     return true;
   }
   function drawGround(time){

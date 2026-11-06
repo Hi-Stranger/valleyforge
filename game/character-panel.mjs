@@ -1,5 +1,6 @@
-import {SWORD_SKILLS} from './sword-skills.mjs?v=2026.11.06.1';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.1';
+import {SWORD_SKILLS} from './sword-skills.mjs?v=2026.11.06.2';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.06.2';
+import {drawPlayerPortrait} from './character-art.mjs?v=2026.11.06.2';
 
 const DETAILS={
   triple:{tags:['三段追击','末段打断'],damage:'三段：攻击力 × 1 / 1 / 1.5',desc:'连续挥出三段剑光，逐段向前追击，最后一击可打断敌人蓄力。'},
@@ -11,7 +12,7 @@ function skillIcon(id){const swords='<path d="M16 8 8 35M27 7 18 35M38 9 28 35" 
   const art={triple:swords,dash:'<path d="m7 31 17-15-2 9L42 15 27 36l1-11-15 12Z" fill="#e1ffff"/><path d="M4 17h13M2 23h9M5 39h15" stroke="#53cef3" stroke-width="2"/>',crescent:'<path d="M12 5C44 10 48 34 11 43 29 31 32 19 12 5Z" fill="#49b8ed"/><path d="M17 7C45 16 43 33 14 41 34 29 34 19 17 7Z" fill="#e6ffff"/><path d="M6 14h4M5 34h4" stroke="#9cf2ff" stroke-width="2"/>',storm:'<path d="M24 4v33M8 12l11 24M40 12 29 36" stroke="#57c9f6" stroke-width="6"/><path d="M24 3v32M8 11l11 24M40 11 29 35M17 30h14M7 29l10-4M31 25l10 4" stroke="#eaffff" stroke-width="2"/><path d="m24 36 4 5-4 4-4-4Z" fill="#f5d18c"/>'};
   return `<svg viewBox="0 0 48 48" aria-hidden="true" shape-rendering="geometricPrecision">${art[id]}</svg>`;
 }
-export function mountCharacterPanel({body,state,st,gear,slots,icon,world,atlas,ground,tab,selected,onTab,onSelect,onEquipment}){
+export function mountCharacterPanel({body,state,st,gear,slots,icon,world,atlas,playerImage,ground,tab,selected,onTab,onSelect,onEquipment}){
   const weapon=gear[state.equipped.weapon],charm=gear[state.equipped.charm];
   const tabs=`<div class="profile-tabs" role="tablist" aria-label="人物档案分页"><button role="tab" data-profile-tab="attributes" aria-selected="${tab==='attributes'}">人物属性</button><button role="tab" data-profile-tab="skills" aria-selected="${tab==='skills'}">技能介绍</button></div>`;
   const rule='<p class="profile-rule">✦ 每次战斗结束，所有技能冷却重置</p>';
@@ -20,7 +21,7 @@ export function mountCharacterPanel({body,state,st,gear,slots,icon,world,atlas,g
     const canvas=body.querySelector('#profile-portrait'),c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
     const light=c.createRadialGradient(110,67,5,110,67,114);light.addColorStop(0,'#34463b');light.addColorStop(1,'#0b1917');c.fillStyle=light;c.fillRect(0,0,220,138);
     c.strokeStyle='#a58c4e38';for(const x of [26,194]){c.beginPath();c.moveTo(x,8);c.lineTo(x,113);c.stroke();}c.fillStyle='#13201b';c.beginPath();c.ellipse(110,124,61,12,0,0,Math.PI*2);c.fill();c.fillStyle='#3a4841';c.beginPath();c.ellipse(110,119,57,13,0,0,Math.PI*2);c.fill();c.strokeStyle='#9ba58b';c.stroke();c.strokeStyle='#56675a';c.beginPath();c.ellipse(110,117,46,8,0,0,Math.PI*2);c.stroke();
-    const f=world.atlas[world.clips['player.idle.down'][0]],s=4.6;c.drawImage(atlas,f.x,f.y,f.w,f.h,110+f.ox*s,116+f.oy*s,f.w*s,f.h*s);
+    drawPlayerPortrait(c,playerImage,world,{x:110,y:116,height:92});
     if(state.equipped.armor==='leather'){c.fillStyle='#b78a59';c.fillRect(85,79,8,12);c.fillRect(127,79,8,12);}
     if(charm){c.fillStyle='#d8bbf1';c.fillRect(108,87,5,5);}
     c.save();c.translate(145,92);c.rotate(.55);c.fillStyle=state.equipped.weapon==='coreblade'?'#efd18b':'#d2e3dc';c.fillRect(-2,-32,5,35);c.fillStyle='#aa8859';c.fillRect(-8,1,17,4);c.fillRect(-2,4,5,10);if(state.equipped.weapon==='stonehammer'){c.fillStyle='#90a9a6';c.fillRect(-12,-35,26,17);}c.restore();
@@ -33,7 +34,7 @@ export function mountCharacterPanel({body,state,st,gear,slots,icon,world,atlas,g
   body.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>onTab(b.dataset.profileTab));
   if(tab!=='skills')return null;
   const canvas=body.querySelector('#profile-skill-preview'),c=canvas.getContext('2d'),vfx=createSwordVfx(),start=performance.now()/1000;
-  function sprite(clip,x,y,t,scale=1.65){const fs=world.clips[clip],f=world.atlas[fs[Math.floor(t*9)%fs.length]];c.drawImage(atlas,f.x,f.y,f.w,f.h,x+f.ox*scale,y+f.oy*scale,f.w*scale,f.h*scale);}
+  function sprite(clip,x,y,t,scale=1.65){const fs=world.clips[clip],key=fs[Math.floor(t*9)%fs.length],f=world.atlas[key];scale*=f.unitScale||1;c.drawImage(key.startsWith('player-b:')?playerImage:atlas,f.x,f.y,f.w,f.h,x+f.ox*scale,y+f.oy*scale,f.w*scale,f.h*scale);}
   return now=>{
     const age=(now-start)%3,u=age-.3,effects=[],pulse=(id,x,y,radius,life,max,extra={})=>{if(life>0&&life<=max)effects.push({id,x,y,radius,angle:0,life,max,...extra});};
     const rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),w=Math.round(rect.width*dpr),h=Math.round(rect.height*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}

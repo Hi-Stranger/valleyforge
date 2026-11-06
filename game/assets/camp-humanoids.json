@@ -1,0 +1,515 @@
+{
+  "id": "camp-humanoids-v2",
+  "cell": 96,
+  "foot": 82,
+  "frames": {
+    "camp-v2:smith:0": {
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 46,
+      "bodyTop": 36,
+      "bounds": {
+        "x": 34,
+        "y": 36,
+        "w": 33,
+        "h": 46
+      }
+    },
+    "camp-v2:smith:1": {
+      "x": 96,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 46,
+      "bodyTop": 36,
+      "bounds": {
+        "x": 26,
+        "y": 36,
+        "w": 36,
+        "h": 46
+      }
+    },
+    "camp-v2:smith:2": {
+      "x": 192,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 46,
+      "bodyTop": 36,
+      "bounds": {
+        "x": 34,
+        "y": 36,
+        "w": 38,
+        "h": 46
+      }
+    },
+    "camp-v2:smith:3": {
+      "x": 288,
+      "y": 0,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 46,
+      "bodyTop": 36,
+      "bounds": {
+        "x": 35,
+        "y": 36,
+        "w": 32,
+        "h": 46
+      }
+    },
+    "camp-v2:mage:0": {
+      "x": 0,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 50,
+      "bodyTop": 32,
+      "bounds": {
+        "x": 31,
+        "y": 32,
+        "w": 30,
+        "h": 50
+      }
+    },
+    "camp-v2:mage:1": {
+      "x": 96,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 50,
+      "bodyTop": 32,
+      "bounds": {
+        "x": 32,
+        "y": 32,
+        "w": 30,
+        "h": 50
+      }
+    },
+    "camp-v2:mage:2": {
+      "x": 192,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 50,
+      "bodyTop": 32,
+      "bounds": {
+        "x": 33,
+        "y": 32,
+        "w": 31,
+        "h": 50
+      }
+    },
+    "camp-v2:mage:3": {
+      "x": 288,
+      "y": 96,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 50,
+      "bodyTop": 32,
+      "bounds": {
+        "x": 32,
+        "y": 32,
+        "w": 30,
+        "h": 50
+      }
+    },
+    "camp-v2:hero:0": {
+      "x": 0,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 34,
+      "bodyTop": 48,
+      "bounds": {
+        "x": 37,
+        "y": 48,
+        "w": 26,
+        "h": 34
+      }
+    },
+    "camp-v2:hero:1": {
+      "x": 96,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 34,
+      "bodyTop": 48,
+      "bounds": {
+        "x": 37,
+        "y": 48,
+        "w": 26,
+        "h": 34
+      }
+    },
+    "camp-v2:hero:2": {
+      "x": 192,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 34,
+      "bodyTop": 48,
+      "bounds": {
+        "x": 36,
+        "y": 48,
+        "w": 27,
+        "h": 34
+      }
+    },
+    "camp-v2:hero:3": {
+      "x": 288,
+      "y": 192,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 34,
+      "bodyTop": 48,
+      "bounds": {
+        "x": 37,
+        "y": 48,
+        "w": 26,
+        "h": 34
+      }
+    },
+    "camp-v2:merchant:0": {
+      "x": 0,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 44,
+      "bodyTop": 38,
+      "bounds": {
+        "x": 36,
+        "y": 38,
+        "w": 24,
+        "h": 44
+      }
+    },
+    "camp-v2:merchant:1": {
+      "x": 96,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 44,
+      "bodyTop": 38,
+      "bounds": {
+        "x": 36,
+        "y": 38,
+        "w": 24,
+        "h": 44
+      }
+    },
+    "camp-v2:merchant:2": {
+      "x": 192,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 44,
+      "bodyTop": 38,
+      "bounds": {
+        "x": 36,
+        "y": 38,
+        "w": 25,
+        "h": 44
+      }
+    },
+    "camp-v2:merchant:3": {
+      "x": 288,
+      "y": 288,
+      "w": 96,
+      "h": 96,
+      "ox": -48,
+      "oy": -82,
+      "unitScale": 1,
+      "bodyHeight": 44,
+      "bodyTop": 38,
+      "bounds": {
+        "x": 36,
+        "y": 38,
+        "w": 24,
+        "h": 44
+      }
+    }
+  },
+  "clips": {
+    "smith": [
+      "camp-v2:smith:0",
+      "camp-v2:smith:1",
+      "camp-v2:smith:1",
+      "camp-v2:smith:1",
+      "camp-v2:smith:2",
+      "camp-v2:smith:3",
+      "camp-v2:smith:3",
+      "camp-v2:smith:0"
+    ],
+    "mage": [
+      "camp-v2:mage:0",
+      "camp-v2:mage:1",
+      "camp-v2:mage:2",
+      "camp-v2:mage:3",
+      "camp-v2:mage:0",
+      "camp-v2:mage:1",
+      "camp-v2:mage:2",
+      "camp-v2:mage:3"
+    ],
+    "hero": [
+      "camp-v2:hero:0",
+      "camp-v2:hero:0",
+      "camp-v2:hero:1",
+      "camp-v2:hero:1",
+      "camp-v2:hero:2",
+      "camp-v2:hero:2",
+      "camp-v2:hero:3",
+      "camp-v2:hero:3"
+    ],
+    "merchant": [
+      "camp-v2:merchant:0",
+      "camp-v2:merchant:0",
+      "camp-v2:merchant:1",
+      "camp-v2:merchant:1",
+      "camp-v2:merchant:2",
+      "camp-v2:merchant:2",
+      "camp-v2:merchant:3",
+      "camp-v2:merchant:3"
+    ]
+  },
+  "measurements": [
+    {
+      "key": "camp-v2:smith:0",
+      "source": {
+        "left": 96,
+        "top": 46,
+        "right": 269,
+        "bottom": 290,
+        "bodyTop": 46
+      },
+      "targetHeight": 46,
+      "scale": 0.18775510204081633
+    },
+    {
+      "key": "camp-v2:smith:1",
+      "source": {
+        "left": 361,
+        "top": 44,
+        "right": 553,
+        "bottom": 290,
+        "bodyTop": 44
+      },
+      "targetHeight": 46,
+      "scale": 0.1862348178137652
+    },
+    {
+      "key": "camp-v2:smith:2",
+      "source": {
+        "left": 705,
+        "top": 68,
+        "right": 887,
+        "bottom": 290,
+        "bodyTop": 68
+      },
+      "targetHeight": 46,
+      "scale": 0.2062780269058296
+    },
+    {
+      "key": "camp-v2:smith:3",
+      "source": {
+        "left": 1012,
+        "top": 47,
+        "right": 1179,
+        "bottom": 290,
+        "bodyTop": 47
+      },
+      "targetHeight": 46,
+      "scale": 0.1885245901639344
+    },
+    {
+      "key": "camp-v2:mage:0",
+      "source": {
+        "left": 85,
+        "top": 336,
+        "right": 244,
+        "bottom": 602,
+        "bodyTop": 336
+      },
+      "targetHeight": 50,
+      "scale": 0.18726591760299627
+    },
+    {
+      "key": "camp-v2:mage:1",
+      "source": {
+        "left": 398,
+        "top": 337,
+        "right": 556,
+        "bottom": 602,
+        "bodyTop": 337
+      },
+      "targetHeight": 50,
+      "scale": 0.18796992481203006
+    },
+    {
+      "key": "camp-v2:mage:2",
+      "source": {
+        "left": 706,
+        "top": 343,
+        "right": 867,
+        "bottom": 602,
+        "bodyTop": 343
+      },
+      "targetHeight": 50,
+      "scale": 0.19230769230769232
+    },
+    {
+      "key": "camp-v2:mage:3",
+      "source": {
+        "left": 1013,
+        "top": 340,
+        "right": 1168,
+        "bottom": 602,
+        "bodyTop": 340
+      },
+      "targetHeight": 50,
+      "scale": 0.19011406844106463
+    },
+    {
+      "key": "camp-v2:hero:0",
+      "source": {
+        "left": 86,
+        "top": 664,
+        "right": 273,
+        "bottom": 907,
+        "bodyTop": 664
+      },
+      "targetHeight": 34,
+      "scale": 0.13934426229508196
+    },
+    {
+      "key": "camp-v2:hero:1",
+      "source": {
+        "left": 399,
+        "top": 662,
+        "right": 583,
+        "bottom": 907,
+        "bodyTop": 662
+      },
+      "targetHeight": 34,
+      "scale": 0.13821138211382114
+    },
+    {
+      "key": "camp-v2:hero:2",
+      "source": {
+        "left": 708,
+        "top": 676,
+        "right": 892,
+        "bottom": 907,
+        "bodyTop": 676
+      },
+      "targetHeight": 34,
+      "scale": 0.14655172413793102
+    },
+    {
+      "key": "camp-v2:hero:3",
+      "source": {
+        "left": 1019,
+        "top": 665,
+        "right": 1201,
+        "bottom": 907,
+        "bodyTop": 665
+      },
+      "targetHeight": 34,
+      "scale": 0.13991769547325103
+    },
+    {
+      "key": "camp-v2:merchant:0",
+      "source": {
+        "left": 98,
+        "top": 977,
+        "right": 228,
+        "bottom": 1217,
+        "bodyTop": 977
+      },
+      "targetHeight": 44,
+      "scale": 0.1825726141078838
+    },
+    {
+      "key": "camp-v2:merchant:1",
+      "source": {
+        "left": 409,
+        "top": 971,
+        "right": 545,
+        "bottom": 1217,
+        "bodyTop": 971
+      },
+      "targetHeight": 44,
+      "scale": 0.17813765182186234
+    },
+    {
+      "key": "camp-v2:merchant:2",
+      "source": {
+        "left": 721,
+        "top": 981,
+        "right": 855,
+        "bottom": 1217,
+        "bodyTop": 981
+      },
+      "targetHeight": 44,
+      "scale": 0.18565400843881857
+    },
+    {
+      "key": "camp-v2:merchant:3",
+      "source": {
+        "left": 1028,
+        "top": 976,
+        "right": 1160,
+        "bottom": 1217,
+        "bodyTop": 976
+      },
+      "targetHeight": 44,
+      "scale": 0.18181818181818182
+    }
+  ]
+}

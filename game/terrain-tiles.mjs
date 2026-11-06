@@ -1,6 +1,23 @@
-import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.06.1';
+import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.06.2';
 const terrainViews=new WeakMap();
 const staticGrounds=new WeakMap();
+
+// Blend a few exposed former prop footprints once during static-cache creation.
+// The source is editable terrain, never a concept screenshot or per-frame patch.
+function repairExposedGround(paint,world){
+  for(const p of world.terrainRepairs||[]){
+    const patch=document.createElement('canvas');patch.width=p.w;patch.height=p.h;
+    const c=patch.getContext('2d');c.imageSmoothingEnabled=false;
+    c.drawImage(paint.canvas,p.x+p.dx,p.y,p.w,p.h,0,0,p.w,p.h);
+    c.globalCompositeOperation='destination-in';
+    for(const [x0,y0,x1,y1,ratio] of [[0,0,p.w,0,p.feather/p.w],[0,0,0,p.h,p.feather/p.h]]){
+      const gradient=c.createLinearGradient(x0,y0,x1,y1);
+      gradient.addColorStop(0,'transparent');gradient.addColorStop(ratio,'#000');gradient.addColorStop(1-ratio,'#000');gradient.addColorStop(1,'transparent');
+      c.fillStyle=gradient;c.fillRect(0,0,p.w,p.h);
+    }
+    paint.drawImage(patch,p.x,p.y);patch.width=patch.height=0;
+  }
+}
 
 // Small static scenes keep their ground independently of camera coordinates.
 // It is assembled from editable tile data, not from a concept/background image.
@@ -10,7 +27,7 @@ function drawStaticGround(ctx,image,world,view){
   const x1=Math.min(cols,Math.ceil((view.x+view.width)/t)),y1=Math.min(world.height/t,Math.ceil((view.y+view.height)/t));
   if(x1<=x0||y1<=y0)return;
   let cached=staticGrounds.get(world);
-  if(!cached||cached.image!==image||cached.layers!==world.tileLayers||cached.atlas!==world.atlas||cached.frames!==world.tileFrames||cached.width!==world.width||cached.height!==world.height||cached.tileSize!==t||cached.cols!==cols||cached.revision!==world.terrainRevision){
+  if(!cached||cached.image!==image||cached.layers!==world.tileLayers||cached.atlas!==world.atlas||cached.frames!==world.tileFrames||cached.width!==world.width||cached.height!==world.height||cached.tileSize!==t||cached.cols!==cols||cached.revision!==world.terrainRevision||cached.repairs!==world.terrainRepairs){
     const buffer=cached?.canvas||document.createElement('canvas');
     buffer.width=world.width;buffer.height=world.height;
     const paint=buffer.getContext('2d');paint.imageSmoothingEnabled=false;
@@ -19,7 +36,8 @@ function drawStaticGround(ctx,image,world,view){
       const frame=world.atlas[world.tileFrames[gid]];
       paint.drawImage(image,frame.x,frame.y,frame.w,frame.h,x*t,y*t,t,t);
     }
-    cached={canvas:buffer,image,layers:world.tileLayers,atlas:world.atlas,frames:world.tileFrames,width:world.width,height:world.height,tileSize:t,cols,revision:world.terrainRevision};
+    repairExposedGround(paint,world);
+    cached={canvas:buffer,image,layers:world.tileLayers,atlas:world.atlas,frames:world.tileFrames,width:world.width,height:world.height,tileSize:t,cols,revision:world.terrainRevision,repairs:world.terrainRepairs};
     staticGrounds.set(world,cached);
   }
   // Preserve the original viewport-aligned sampling at fractional phone zooms.
@@ -42,8 +60,9 @@ export async function prepareTerrainTiles(image,world,{signal,onProgress=()=>{},
       done++;if(done%8===0){onProgress(done,total);await new Promise(resolve=>setTimeout(resolve,0));}
     }
     if(signal?.aborted)throw new DOMException('场景已离开','AbortError');
+    repairExposedGround(paint,world);
     const previous=staticGrounds.get(world);if(previous){previous.canvas.width=0;previous.canvas.height=0;}
-    staticGrounds.set(world,{canvas,image,layers:world.tileLayers,atlas:world.atlas,frames:world.tileFrames,width:world.width,height:world.height,tileSize:t,cols,revision:world.terrainRevision});
+    staticGrounds.set(world,{canvas,image,layers:world.tileLayers,atlas:world.atlas,frames:world.tileFrames,width:world.width,height:world.height,tileSize:t,cols,revision:world.terrainRevision,repairs:world.terrainRepairs});
     onProgress(total,total);
   }catch(error){canvas.width=0;canvas.height=0;throw error;}
 }
