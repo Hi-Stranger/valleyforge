@@ -40,7 +40,13 @@ export function createTownCamp({ctx,world,image,npcImage,npcScale=()=>1,visible}
     if(o.custom!=='camp-actor')return false;
     const actor=world.campActors[o.actor];
     const pose=campPosesAt(time)[o.actor]??Math.floor(time*2)%actor.frames.length;
-    frame(actor.frames[pose],o.x,o.y,actor.scale);
+    // The strike frame's hammer face is at (20,-12) from the sprite's foot
+    // anchor. Position the whole cycle against the anvil, not each frame,
+    // so the feet do not drift as the hammer rises and falls.
+    const scale=npcScale();
+    const x=o.actor==='smith'?434-20*scale:o.x;
+    const y=o.actor==='smith'?348+12*scale:o.y;
+    frame(actor.frames[pose],x,y,actor.scale);
     return true;
   }
   function drawGround(time){
@@ -70,8 +76,8 @@ export function createTownCamp({ctx,world,image,npcImage,npcScale=()=>1,visible}
       glow(x,y,7,'#ffac30',a*.2);pixel(x,y,i%3?2:3,'#ffce68',a);
     }
     if(visible(434,348,40)){
-      const impact=t%1.5-.89;
-      if(impact>=0&&impact<.18){const u=impact/.18;glow(434,348,21,'#ffcf69',(1-u)*.45);for(let i=0;i<3;i++)pixel(434+(i-1)*u*24,346-u*(16+i*5)+u*u*11,2,'#ffd88a',1-u);}
+      const impact=t%1.5-.79;
+      if(impact>=0&&impact<.1){const u=impact/.1;glow(434,348,21,'#ffcf69',(1-u)*.45);for(let i=0;i<3;i++)pixel(434+(i-1)*u*24,348-u*(16+i*5)+u*u*11,2,'#ffd88a',1-u);}
     }
     if(visible(1225,290,130)){
       ctx.save();ctx.beginPath();ctx.ellipse(1225,319,44,11,0,0,TAU);ctx.clip();
