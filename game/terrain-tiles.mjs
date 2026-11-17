@@ -1,4 +1,4 @@
-import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.17.1';
+import {prepareChunkTerrain,drawChunkTerrain,releaseChunkTerrain,chunkTerrainStats} from './chunk-terrain.mjs?v=2026.11.17.2';
 const terrainViews=new WeakMap();
 const staticGrounds=new WeakMap();
 
@@ -31,12 +31,13 @@ function drawStaticGround(ctx,image,world,view){
     const buffer=cached?.canvas||document.createElement('canvas');
     buffer.width=world.width;buffer.height=world.height;
     const paint=buffer.getContext('2d');paint.imageSmoothingEnabled=false;
+    if(world.camp?.style==='night-camp')paint.filter='url(#camp-moonlight)';
     for(const layer of world.tileLayers)for(let y=0;y<world.height/t;y++)for(let x=0;x<cols;x++){
       const gid=layer.data[y*cols+x];if(!gid)continue;
       const frame=world.atlas[world.tileFrames[gid]];
       paint.drawImage(image,frame.x,frame.y,frame.w,frame.h,x*t,y*t,t,t);
     }
-    repairExposedGround(paint,world);
+    paint.filter='none';repairExposedGround(paint,world);
     cached={canvas:buffer,image,layers:world.tileLayers,atlas:world.atlas,frames:world.tileFrames,width:world.width,height:world.height,tileSize:t,cols,revision:world.terrainRevision,repairs:world.terrainRepairs};
     staticGrounds.set(world,cached);
   }
@@ -52,6 +53,7 @@ export async function prepareTerrainTiles(image,world,{signal,onProgress=()=>{},
   const t=world.tileSize||32,cols=world.tileCols||world.cols;
   const canvas=document.createElement('canvas');canvas.width=world.width;canvas.height=world.height;
   const paint=canvas.getContext('2d');paint.imageSmoothingEnabled=false;
+  if(world.camp?.style==='night-camp')paint.filter='url(#camp-moonlight)';
   try{
     const rows=world.height/t,total=rows*world.tileLayers.length;let done=0;
     for(const layer of world.tileLayers)for(let y=0;y<rows;y++){
@@ -60,7 +62,7 @@ export async function prepareTerrainTiles(image,world,{signal,onProgress=()=>{},
       done++;if(done%8===0){onProgress(done,total);await new Promise(resolve=>setTimeout(resolve,0));}
     }
     if(signal?.aborted)throw new DOMException('场景已离开','AbortError');
-    repairExposedGround(paint,world);
+    paint.filter='none';repairExposedGround(paint,world);
     const previous=staticGrounds.get(world);if(previous){previous.canvas.width=0;previous.canvas.height=0;}
     staticGrounds.set(world,{canvas,image,layers:world.tileLayers,atlas:world.atlas,frames:world.tileFrames,width:world.width,height:world.height,tileSize:t,cols,revision:world.terrainRevision,repairs:world.terrainRepairs});
     onProgress(total,total);

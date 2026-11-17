@@ -45,10 +45,10 @@ export function createTownCamp({ctx,world,image,npcImage,npcScale=()=>1,visible}
   }
   function drawGround(time){
     const q=time*TAU/6;
-    glow(763,532,216,'#ef821d',.045+.015*Math.sin(q*5)+.008*Math.sin(q*11));
-    glow(288,293,98,'#ff9e25',.04+.017*Math.sin(q*7+.7));
+    glow(763,532,216,'#ef821d',.16+.015*Math.sin(q*5)+.008*Math.sin(q*11));
+    glow(288,293,98,'#ff9e25',.11+.017*Math.sin(q*7+.7));
     glow(1210,397,69,'#ffac2a',.035+.014*Math.sin(q*9));
-    glow(1224,318,62,'#bd50f0',.045+.02*Math.sin(q*2));
+    glow(1224,318,62,'#bd50f0',.14+.025*Math.sin(q*2));
   }
   function flame(x,y,scale,time,phase){
     if(!visible(x,y,70))return;
