@@ -1,31 +1,31 @@
-import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.25.1';
-import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.25.1';
-import {createSceneResources} from './scene-resources.mjs?v=2026.11.25.1';
-import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.25.1';
-import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.25.1';
-import {mountRegionMap} from './region-map.mjs?v=2026.11.25.1';
-import {mountTownNavigation} from './town.mjs?v=2026.11.25.1';
-import {createNewCamp} from './new-camp-animation.mjs?v=2026.11.25.1';
-import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.25.1';
-import {mountFullscreen} from './fullscreen.mjs?v=2026.11.25.1';
-import {mountPanelFit} from './panel-fit.mjs?v=2026.11.25.1';
-import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.25.1';
-import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.25.1';
-import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.25.1';
-import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.25.1';
-import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.25.1';
-import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.25.1';
-import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.25.1';
-import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.25.1';
-import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.25.1';
-import {loadCharacterArt,drawPlayerPortrait} from './character-art.mjs?v=2026.11.25.1';
+import {scheduleIdlePrefetch} from './idle-prefetch.mjs?v=2026.11.25.3';
+import {createPerformanceProbe} from './performance-probe.mjs?v=2026.11.25.3';
+import {createSceneResources} from './scene-resources.mjs?v=2026.11.25.3';
+import {prepareMeadowWater} from './meadow-water.mjs?v=2026.11.25.3';
+import {mountExitGuidance} from './exit-guidance.mjs?v=2026.11.25.3';
+import {mountRegionMap} from './region-map.mjs?v=2026.11.25.3';
+import {mountTownNavigation} from './town.mjs?v=2026.11.25.3';
+import {createNewCamp} from './new-camp-animation.mjs?v=2026.11.25.3';
+import {mountMonsterHealthBars} from './monster-health.mjs?v=2026.11.25.3';
+import {mountFullscreen} from './fullscreen.mjs?v=2026.11.25.3';
+import {mountPanelFit} from './panel-fit.mjs?v=2026.11.25.3';
+import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.25.3';
+import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.25.3';
+import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.25.3';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.25.3';
+import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.25.3';
+import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.25.3';
+import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.25.3';
+import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.25.3';
+import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.25.3';
+import {loadCharacterArt,drawPlayerPortrait} from './character-art.mjs?v=2026.11.25.3';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.25.1';
+const GAME_VERSION='2026.11.26.1';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -96,8 +96,7 @@ function buildCollision(){cliffSet=new Set(world.cliffs.map(p=>p.join(',')));blo
   for(const [x,y,r] of world.trunks)addObstacle({x:x-r,y:y-r,w:r*2,h:r*2,kind:'Tree'});
   if(!FIELD)addObstacle({x:2114,y:778,w:76,h:72,kind:'Fountain'});
 }
-// The camp bridge runs diagonally between narrow rails. Search a finer grid
-// and validate the complete movement segment, including the player's radius.
+// Search a finer grid around the camp's bridge and narrow paths, checking the player's radius along each segment.
 function townPathTo(e,tx,ty,exact){
   const step=16,cols=world.width/step,rows=world.height/step;
   const sx=Math.floor(e.x/step),sy=Math.floor(e.y/step),gx=Math.floor(tx/step),gy=Math.floor(ty/step);
@@ -110,7 +109,9 @@ function townPathTo(e,tx,ty,exact){
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
       const x=p.x+dx,y=p.y+dy;if(x<1||x>=cols-1||y<1||y>=rows-1)continue;
       const target=center(x,y),from=p===start?e:center(p.x,p.y);
-      if(!pointFree(target.x,target.y,e.r)||!walkSegment(from,target))continue;
+      // Leave room for movement to advance before it reaches the exact grid center.
+      const clearance=e.r+2;
+      if(!pointFree(target.x,target.y,clearance)||!walkSegment(from,target,p===start?e.r:clearance))continue;
       const g=p.g+Math.hypot(dx,dy),k=key(x,y);if(g>=(cost.get(k)??Infinity))continue;
       cost.set(k,g);prev.set(k,p);open.push({x,y,g,f:g+Math.hypot(x-gx,y-gy)});
     }
@@ -257,7 +258,7 @@ function nearby(){if(mode!=='exploration')return null;if(TOWN){const shop=world.
 function travelRegion(region){if(!['town','meadow','mine','valley'].includes(region)||region===REGION||mode!=='exploration'||phase!=='playing'||modal||travelPending)return;if(distance(player,exitPoint())>34){toast('先到达区域出口再旅行',true);return;}travelPending=true;releaseControls();persist();const url=new URL(location.href);url.searchParams.set('region',region);url.searchParams.set('from',REGION);location.assign(url.href);}
 function openTownShop(shop){shopFilter=['weapon','armor'].includes(shop.id)?shop.id:null;if(['forge','weapon','armor'].includes(shop.id)){openModal('forge');return;}openModal(shop.id==='potion'?'pharmacy':'goods');}
 function interact(){if(phase!=='playing'||modal||mode!=='exploration')return;const near=nearby();if(near?.kind==='shop'){openTownShop(near.shop);return;}if(near?.kind==='town-exit'){requestExplorationAction({kind:'travel',target:exitPoint(),region:'meadow',reach:24});return;}if(near?.kind==='town-entry'){requestExplorationAction({kind:'travel',target:exitPoint(),region:'town',reach:24});return;}if(near?.kind==='smith'){openModal('forge');return;}if(near?.kind==='node'){harvest(near.node);return;}if(safeZone()){rest();return;}toast('靠近铁匠或采集点按 E；靠近怪物会自动进入战斗');}
-function walkSegment(a,b){let previous=a;const steps=Math.max(1,Math.ceil(distance(a,b)/4));for(let i=1;i<=steps;i++){const next={x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps};if(!pointFree(next.x,next.y,player.r)||!transition(previous.x,previous.y,next.x,next.y))return false;previous=next;}return true;}
+function walkSegment(a,b,r=player.r){let previous=a;const steps=Math.max(1,Math.ceil(distance(a,b)/4));for(let i=1;i<=steps;i++){const next={x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps};if(!pointFree(next.x,next.y,r)||!transition(previous.x,previous.y,next.x,next.y))return false;previous=next;}return true;}
 function exitPoint(){return TOWN?world.exit:gateway;}
 function initialScenePosition(){
   if(!arrivingFrom){const saved=state.region===REGION&&state.position?state.position:respawn;const position=findFree(saved.x,saved.y,player.r);if(!TOWN)return position;
@@ -269,7 +270,8 @@ function initialScenePosition(){
   const gate=TOWN?world.exit:world.entry||respawn;
   const landing=TOWN?{dx:-224,dy:48,aim:Math.PI*.75}:MEADOW?{dx:48,dy:0,aim:0}:MINE?{dx:-64,dy:0,aim:Math.PI}:{dx:0,dy:0,aim:Math.PI};
   const dir=Math.abs(Math.cos(landing.aim))>.65?'right':Math.sin(landing.aim)>0?'down':'up';
-  return {...findFree(gate.x+landing.dx,gate.y+landing.dy,player.r),aim:landing.aim,dir};
+  const arrival=TOWN&&world.arrival?world.arrival:{x:gate.x+landing.dx,y:gate.y+landing.dy};
+  return {...findFree(arrival.x,arrival.y,player.r),aim:landing.aim,dir};
 }
 function routeTo(x,y){const goal=findFree(x,y,player.r);if(walkSegment(player,goal))return [goal];const route=pathTo(player,goal.x,goal.y,true);if(!route?.length||!walkSegment(player,route[0]))return [];if(walkSegment(route.at(-1),goal))route.push(goal);return route;}
 function setWalkTarget(x,y){explorationAction=null;walkPath=routeTo(x,y);if(!walkPath.length){toast('这里暂时无法到达，请点击附近道路');return false;}walkRippleStart=time;pointer.active=false;channel=0;return true;}
@@ -363,7 +365,7 @@ function worldText(text,x,y,color='#fff0c7',size=9){ctx.font=`${size}px "Microso
 function sceneVisible(o){if(o.custom)return visible(o.x,o.y,160);const f=world.atlas[o.frames[0].key],left=o.x+f.ox*o.scale,top=o.y+f.oy*(o.scaleY||o.scale);return left+f.w*o.scale>camera.x&&left<camera.x+screenW/zoom&&top+f.h*(o.scaleY||o.scale)>camera.y&&top<camera.y+screenH/zoom;}
 function sceneObject(o){if(!sceneVisible(o))return;if(TOWN&&townCamp?.drawObject(o,time))return;let total=o.frames.reduce((a,f)=>a+f.ms,0),clock=(time*1000+(o.x*13+o.y*7))%total,f=o.frames[0];for(const frame of o.frames){clock-=frame.ms;if(clock<0){f=frame;break;}}
   const box=world.atlas[f.key],left=o.x+box.ox*o.scale,top=o.y+box.oy*(o.scaleY||o.scale);
-  const fade=!TOWN&&o.depth>player.y&&player.x>left-8&&player.x<left+box.w*o.scale+8&&player.y-15>top&&player.y-15<top+box.h*(o.scaleY||o.scale);
+  const fade=(!TOWN||o.fadeBehind)&&o.depth>player.y&&player.x>left-8&&player.x<left+box.w*o.scale+8&&player.y-15>top&&player.y-15<top+box.h*(o.scaleY||o.scale);
   const moonlitTree=TOWN&&/^town:camp-(northwest|north-mid|north-center|north-east|left-mid|left-pine|southwest|southeast|right-mid|right-north)$/.test(f.key);
   if(moonlitTree){ctx.save();ctx.filter='url(#camp-moonlight)';}
   if(o.rotation){ctx.save();ctx.translate(o.x,o.y+box.h*(o.scaleY||o.scale));ctx.rotate(o.rotation*Math.PI/180);drawFrame(f.key,0,-box.h*(o.scaleY||o.scale),o.scale,false,fade?.38:1,o.scaleY||o.scale);ctx.restore();}else drawFrame(f.key,o.x,o.y,o.scale,false,fade?.38:1,o.scaleY||o.scale);
@@ -446,18 +448,25 @@ function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'
   camera.y=TOWN&&!battle?(height-screenH/zoom)/2:screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*.5,0,height-screenH/zoom);
   if(mode==='exploration')exitGuidance?.update({camera,zoom,width:screenW,height:screenH,selected:explorationAction?.region,time});
   ctx.setTransform(zoom,0,0,zoom,-Math.round(camera.x*zoom)+(Math.random()-.5)*screenShake,-Math.round(camera.y*zoom)+(Math.random()-.5)*screenShake);
+  const clipTown=TOWN&&!battle;
+  if(clipTown){ctx.save();ctx.beginPath();ctx.rect(0,0,width,height);ctx.clip();}
   if(battle){if(MINE)ctx.drawImage(mineBattleGround,0,0,ARENA.width,ARENA.height);else ctx.drawImage(arenaImages[encounter.theme],0,0);if(encounter.theme==='cave'){ctx.fillStyle='#10192440';ctx.fillRect(0,0,ARENA.width,ARENA.height);}ctx.strokeStyle='#d4c28b50';ctx.lineWidth=1;ctx.strokeRect(41,73,ARENA.width-82,ARENA.height-131);}
-  else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());for(const o of world.groundObjects)if(o.frames?.[0]?.key!=='town:new-bridge')sceneObject(o);townCamp?.drawGround(time);for(const o of world.groundObjects)if(o.frames?.[0]?.key==='town:new-bridge')sceneObject(o);worldText('前往溪畔原野',world.exit.x,world.exit.y-25,'#f2d293',12);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
+  else{if(TOWN){drawTerrainTiles(ctx,townAtlas,world,terrainView());for(const o of world.groundObjects)if(o.frames?.[0]?.key!=='town:new-bridge')sceneObject(o);townCamp?.drawGround(time);for(const o of world.groundObjects)if(o.frames?.[0]?.key==='town:new-bridge')sceneObject(o);}else if(MEADOW)drawMeadowTerrain();else if(MINE)drawMineTiles();else ctx.drawImage(ground,0,0,world.width,world.height);if(!FIELD)worldText('路标 · 前往溪畔原野',meadowGateway.x,meadowGateway.y-28,'#f2d293',10);if(MINE){worldText('废矿深窟 · 首领刷新点',world.bossPoint.x,world.bossPoint.y-155,'#f2ba77',12);}for(const o of world.effects)sceneObject(o);drawWalkRipple();}
   for(const item of loot){shadow(item.x,item.y,7);const icon='icon:'+item.key;const f=world.atlas[icon];if(f){const scale=14/Math.max(f.w,f.h);ctx.drawImage(atlas,f.x,f.y,f.w,f.h,item.x-7,item.y-15+Math.sin(time*4)*2,f.w*scale,f.h*scale);}ctx.fillStyle=MATERIALS[item.key]?.color||'#e6c883';ctx.fillRect(item.x-1,item.y-23+Math.sin(time*4)*2,2,2);}
   if(battle){for(const e of enemies)if(e.boar)boarKingArt.ground(ctx,e);drawSwordEffects('ground');}
   const sorted=battle?[...enemies.map(e=>({depth:e.y,draw:()=>drawEnemy(e)})),{depth:player.y,draw:drawPlayer}]:
     [...world.scene.filter(sceneVisible).map(o=>({depth:o.depth,draw:()=>sceneObject(o)})),...world.animals.map(o=>({depth:o.depth,draw:()=>sceneObject(o)})),
     ...(TOWN?(townCamp?.sceneEffects(time)||[]):[]),...nodes.filter(n=>!n.respawn&&visible(n.x,n.y)).map(n=>({depth:n.y,draw:()=>drawNode(n)})),...mapEnemies.filter(e=>visible(e.x,e.y)).map(e=>({depth:e.y,draw:()=>drawMapEnemy(e)})),...(!TOWN?[{depth:smith.y,draw:drawSmith}]:[]),{depth:player.y,draw:drawPlayer}];
-  sorted.sort((a,b)=>a.depth-b.depth);for(const o of sorted)o.draw();if(TOWN&&!battle)townCamp?.drawFront(time);drawSwordEffects();
+  sorted.sort((a,b)=>a.depth-b.depth);for(const o of sorted)o.draw();
+  if(TOWN&&!battle){
+    townCamp?.drawFront(time);
+    for(const shop of world.shops)worldText(shop.name,shop.x,shop.y+19,'#f2d293',Math.max(16,9/zoom));
+  }
+  drawSwordEffects();
   for(const p of particles){ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,2,2);}for(const n of numbers){ctx.globalAlpha=Math.min(1,n.life*2);worldText(n.text,n.x,n.y,n.color,10);}ctx.globalAlpha=1;
   const goal=objective();if(goal){const dx=goal.x-player.x,dy=goal.y-player.y;if(Math.hypot(dx,dy)>(battle?Math.min(115,screenW/zoom*.4):220)){const a=Math.atan2(dy,dx),r=Math.min(screenW/zoom*.36,screenH/zoom*.32),x=player.x+Math.cos(a)*r,y=player.y+Math.sin(a)*r;ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle='#e3c384';ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-4,-4);ctx.lineTo(-4,4);ctx.closePath();ctx.fill();ctx.restore();worldText(goal.label||'铁匠铺',x,y+14,'#e5cd95',8);}}
   updateMonsterHealthBars((mode==='battle'?enemies:[]).filter(e=>!isBoss(e)),ctx.getTransform(),screenW,screenH,e=>{const frame=world.atlas[world.meadowClips?.[e.type]?.[0]];return MEADOW&&frame?frame.h*(ACTOR_SCALE[e.type]||1):MINE?(e.type==='elite'?95:62):e.type==='elite'?58:42;});
-  positionBossBar();ctx.setTransform(1,0,0,1,0,0);
+  positionBossBar();if(clipTown)ctx.restore();ctx.setTransform(1,0,0,1,0,0);
   renderCharacterPreview(stamp);
   // The phone UI hides this minimap. Render it only when a future layout exposes it.
   if($('#map-btn').offsetParent!==null){
