@@ -25,7 +25,7 @@ const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.26.1';
+const GAME_VERSION='2026.11.26.2';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -443,9 +443,9 @@ function drawMapEnemy(e){if(MEADOW&&e.type==='boss'){drawBoarKing(e,true);return
 function renderCharacterPreview(stamp){if(!orientationBlocked&&(modal==='character'||modal==='training')&&characterPreview&&stamp+.2>=previewRenderedAt){previewRenderedAt=Math.max(previewRenderedAt+1000/30,stamp);characterPreview(stamp/1000);}}
 function render(){if(!world)return;showTownNavigation(TOWN&&mode==='exploration'&&phase==='playing'&&!modal&&!orientationBlocked);exitGuidance?.show(mode==='exploration'&&phase==='playing'&&!modal&&!orientationBlocked&&!travelPending);const stamp=performance.now(),frozen=orientationBlocked||!!(modal&&!(modal==='map'&&mode==='exploration'))||!['playing','entering'].includes(phase),key=`${mode}:${phase}:${modal}:${screenW}:${screenH}`;if(frozen&&frozenSceneKey===key&&!sceneDirty){renderCharacterPreview(stamp);return;}frozenSceneKey=frozen?key:null;sceneDirty=false;ctx.imageSmoothingEnabled=false;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=mode==='battle'?'#0d1917':'#162a1d';ctx.fillRect(0,0,screenW,screenH);
   const battle=mode==='battle',width=battle?ARENA.width:world.width,height=battle?ARENA.height:world.height;
-  zoom=battle?Math.max(.9,screenW/ARENA.width,screenH/ARENA.height):TOWN?Math.min(screenW/world.width,screenH/world.height):MEADOW?meadowExplorationZoom():MINE?clamp(screenH/700,.65,1.15):clamp(screenH/300,1.15,2);
-  camera.x=TOWN&&!battle?(width-screenW/zoom)/2:screenW/zoom>width?(width-screenW/zoom)/2:clamp(player.x-screenW/zoom/2,0,width-screenW/zoom);
-  camera.y=TOWN&&!battle?(height-screenH/zoom)/2:screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*.5,0,height-screenH/zoom);
+  zoom=battle?Math.max(.9,screenW/ARENA.width,screenH/ARENA.height):TOWN?Math.max(screenW/world.width,screenH/world.height):MEADOW?meadowExplorationZoom():MINE?clamp(screenH/700,.65,1.15):clamp(screenH/300,1.15,2);
+  camera.x=screenW/zoom>width?(width-screenW/zoom)/2:clamp(player.x-screenW/zoom/2,0,width-screenW/zoom);
+  camera.y=screenH/zoom>height?(height-screenH/zoom)/2:clamp(player.y-screenH/zoom*.5,0,height-screenH/zoom);
   if(mode==='exploration')exitGuidance?.update({camera,zoom,width:screenW,height:screenH,selected:explorationAction?.region,time});
   ctx.setTransform(zoom,0,0,zoom,-Math.round(camera.x*zoom)+(Math.random()-.5)*screenShake,-Math.round(camera.y*zoom)+(Math.random()-.5)*screenShake);
   const clipTown=TOWN&&!battle;
