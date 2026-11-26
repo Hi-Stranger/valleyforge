@@ -1,6 +1,6 @@
 import {SWORD_SKILLS} from './sword-skills.mjs?v=2026.11.25.3';
 import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.25.3';
-import {drawPlayerPortrait} from './character-art.mjs?v=2026.11.25.3';
+import {drawPlayerPortrait,swordCastFrame} from './character-art.mjs?v=2026.11.26.3';
 
 const DETAILS={
   triple:{tags:['三段追击','末段打断'],damage:'三段：攻击力 × 1 / 1 / 1.5',desc:'连续挥出三段剑光，逐段向前追击，最后一击可打断敌人蓄力。'},
@@ -34,7 +34,15 @@ export function mountCharacterPanel({body,state,st,gear,slots,icon,world,atlas,p
   body.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>onTab(b.dataset.profileTab));
   if(tab!=='skills')return null;
   const canvas=body.querySelector('#profile-skill-preview'),c=canvas.getContext('2d'),vfx=createSwordVfx(),start=performance.now()/1000;
-  function sprite(clip,x,y,t,scale=1.65){const fs=world.clips[clip],key=fs[Math.floor(t*9)%fs.length],f=world.atlas[key];scale*=f.unitScale||1;c.drawImage(key.startsWith('player-b:')?playerImage:atlas,f.x,f.y,f.w,f.h,x+f.ox*scale,y+f.oy*scale,f.w*scale,f.h*scale);}
+  function spriteFrame(key,x,y,scale){
+    const f=world.atlas[key];
+    scale*=f.unitScale||1;
+    c.drawImage(key.startsWith('player-b:')?playerImage:atlas,f.x,f.y,f.w,f.h,x+f.ox*scale,y+f.oy*scale,f.w*scale,f.h*scale);
+  }
+  function sprite(clip,x,y,t,scale=1.65){
+    const frames=world.clips[clip];
+    spriteFrame(frames[Math.floor(t*9)%frames.length],x,y,scale);
+  }
   return now=>{
     const age=(now-start)%3,u=age-.3,effects=[],pulse=(id,x,y,radius,life,max,extra={})=>{if(life>0&&life<=max)effects.push({id,x,y,radius,angle:0,life,max,...extra});};
     const rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),w=Math.round(rect.width*dpr),h=Math.round(rect.height*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
@@ -45,6 +53,9 @@ export function mountCharacterPanel({body,state,st,gear,slots,icon,world,atlas,p
     if(selected==='crescent')pulse('arc',px,py,170,.36-(u-.16),.36,{halfAngle:1.4});
     if(selected==='storm'){pulse('ring',px,py,150,2.3-u,2.3);[.25,.55,.85,1.15,1.45,1.85].forEach((b,i)=>pulse('burst',px,py,150,(i===5?.5:.22)-(u-b),i===5?.5:.22,{final:i===5,strike:i+1}));}
     vfx.draw(c,effects,now,'ground');for(const [x,y] of [[500,270],[460,215],[510,310]])sprite('slime.idle',x,y,age,2.3);
-    sprite(u>=0&&u<(selected==='storm'? .22:SWORD_SKILLS[selected].duration)?'player.attack.right':'player.idle.right',px,py,age,3.2);vfx.draw(c,effects,now,'front');c.setTransform(1,0,0,1,0,0);
+    if(u>=0&&u<SWORD_SKILLS[selected].duration){
+      spriteFrame(swordCastFrame(world.clips,'right',selected,u),px,py,3.2);
+    }else sprite('player.idle.right',px,py,age,3.2);
+    vfx.draw(c,effects,now,'front');c.setTransform(1,0,0,1,0,0);
   };
 }

@@ -12,20 +12,20 @@ import {mountPanelFit} from './panel-fit.mjs?v=2026.11.25.3';
 import {MATERIALS,GEAR,RECIPES,SLOT_NAMES,SAVE_KEY,newState,loadState,saveState,stats,addMaterials,materialTotal,canCraft,craft,equip,unequip,deposit,awardXp,die} from './core.mjs?v=2026.11.25.3';
 import {SWORD_SKILLS,claimSwordHit,inSwordPath} from './sword-skills.mjs?v=2026.11.25.3';
 import {createSwordVfx} from './sword-vfx.mjs?v=2026.11.25.3';
-import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.25.3';
+import {mountCharacterPanel} from './character-panel.mjs?v=2026.11.26.3';
 import {createMeadowFish} from './meadow-fish.mjs?v=2026.11.25.3';
 import {createMeadowRipples} from './meadow-ripples.mjs?v=2026.11.25.3';
 import {drawTerrainTiles,prepareTerrainTiles,releaseTerrainTiles,terrainCacheStats} from './terrain-tiles.mjs?v=2026.11.25.3';
 import {BOAR_ACTIONS,createBoarKing,enrageBoarKing,interruptBoarKing,updateBoarKing} from './boar-king.mjs?v=2026.11.25.3';
 import {loadBoarKingArt} from './boar-king-art.mjs?v=2026.11.25.3';
-import {loadCharacterArt,drawPlayerPortrait} from './character-art.mjs?v=2026.11.25.3';
+import {loadCharacterArt,drawPlayerPortrait,swordCastFrame} from './character-art.mjs?v=2026.11.26.3';
 
 const $=s=>document.querySelector(s),canvas=$('#world'),ctx=canvas.getContext('2d',{alpha:false});
 const updateMonsterHealthBars=mountMonsterHealthBars(canvas);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angleDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 // Update this build number for each published game update.
-const GAME_VERSION='2026.11.26.2';
+const GAME_VERSION='2026.11.26.3';
 let pageDisposed=false,resourceStage='读取地图',prefetch=null,featureGeneration=0,mineBattleGround=null,mineGroundTask=null;
 const sceneAbort=new AbortController();
 const resources=createSceneResources({version:GAME_VERSION,onProgress:({completed,requested})=>{if(phase==='loading')$('#loading-text').textContent=`${resourceStage} · ${completed}/${requested}`;}});
@@ -52,6 +52,7 @@ let state;try{const raw=localStorage.getItem(SAVE_KEY);if(raw&&JSON.parse(raw)?.
 // identifies a real crossing. A new game and same-region reload keep their spawn.
 const arrivingFrom=['town','meadow','mine','valley'].includes(travelSource)&&travelSource!==REGION?travelSource:state.started&&state.region!==REGION?state.region:null;
 const player={x:2384,y:1072,r:8,stamina:100,aim:Math.PI,dir:'down',moving:false,invuln:0,attack:0,attackCooldown:0,heavyCooldown:0,roll:0,rollCooldown:0,rollAngle:0,charmBuff:0,lastHurt:-100};
+let playerMotion=null,defeatBodyAge=0;
 const camera={x:0,y:0};const keys=new Set();const mobileKeys=new Set();let pointer={down:false,active:false,x:0,y:0},swing=null,channel=0,screenShake=0,muted=true,audio=null,targetMarker=null,lastPickup='';
 let walkPath=[],walkRippleStart=-Infinity,explorationAction=null,exitGuidance=null,travelPending=false;
 const joystick={x:0,y:0,active:false,id:null,originX:0,originY:0};let attackPointer=null,orientationBlocked=false,queuedHeavy=0;
@@ -209,7 +210,7 @@ function encounterTheme(token){if(MEADOW)return 'forest';if(MINE)return ['boss',
 const THEME_NAMES={forest:'林地遭遇',mountain:'山地遭遇',cave:'岩洞遭遇'};
 function resetJoystick(){joystick.x=joystick.y=0;joystick.active=false;joystick.id=null;$('#stick-knob').style.transform='translate(0px,0px)';$('#joystick').classList.remove('active');}
 function releaseControls(keepWalk=false){if(!keepWalk){walkPath=[];explorationAction=null;}queuedSword=null;queuedHeavy=0;keys.clear();mobileKeys.clear();pointer.down=false;pointer.active=false;pointer.touchAim=false;attackPointer=null;resetJoystick();}
-function clearActions(){for(const f of skillEffects)delete f.attack;swordFields.length=0;swordCast=null;releaseControls();queuedHeavy=0;swing=null;channel=0;player.attack=0;player.roll=0;player.attackCooldown=0;player.charmBuff=0;screenShake=0;}
+function clearActions(){playerMotion=null;for(const f of skillEffects)delete f.attack;swordFields.length=0;swordCast=null;releaseControls();queuedHeavy=0;swing=null;channel=0;player.attack=0;player.roll=0;player.attackCooldown=0;player.charmBuff=0;screenShake=0;}
 function restoreBattleSkills(){for(const id of Object.keys(skillCooldowns))skillCooldowns[id]=0;player.heavyCooldown=0;player.rollCooldown=0;player.attackCooldown=0;queuedSword=null;queuedHeavy=0;}
 function beginEncounter(token){if(mode!=='exploration'||phase!=='playing'||encounter||encounterGrace>0)return;
   const theme=encounterTheme(token);
@@ -245,11 +246,13 @@ function killEnemy(e){if(!encounter||mode!=='battle')return;const idx=enemies.in
   for(const [id,n] of Object.entries(e.drop))pending.items[id]=(pending.items[id]||0)+n;
   if(e.type==='skeleton'&&Math.random()<.2)pending.items.crystal=(pending.items.crystal||0)+1;
   sparks(e.x,e.y,e.color,18);sound(150,.12,'square',.014);if(!enemies.length)finishVictory();}
-function hurtPlayer(n){if(mode!=='battle'||player.invuln>0||phase!=='playing')return;const amount=Math.max(1,Math.round(n-stats(state).defense));state.hp-=amount;player.invuln=.65;player.lastHurt=time;screenShake=5;channel=0;float('-'+amount,player.x,player.y-36,'#f2a28d');sound(100,.13,'sawtooth',.02);
-  if(state.hp<=0){const lost=die(state);phase='dead';clearActions();restoreBattleSkills();skillEffects.length=0;const text=Object.entries(lost).map(([id,n])=>`${MATERIALS[id].name} ×${n}`).join('、');$('#death-text').textContent=(text?'遗失了 '+text+'。':'这次没有遗失材料。')+' 装备和仓库全部保留。';$('#death-cover').hidden=false;persist();}renderUI();}
-function harvest(n){if(mode!=='exploration'||n.respawn>0)return;n.hits++;sparks(n.x,n.y-10,n.type==='wood'?'#c2a274':'#c0c9cf',6);sound(n.type==='wood'?185:560,.07,'square',.012);float(n.type==='wood'?'砍伐':'采掘',n.x,n.y-28,'#d2c89b');
+function hurtPlayer(n){if(mode!=='battle'||player.invuln>0||phase!=='playing')return;const amount=Math.max(1,Math.round(n-stats(state).defense));state.hp-=amount;playPlayerMotion('hit',.22);player.invuln=.65;player.lastHurt=time;screenShake=5;channel=0;float('-'+amount,player.x,player.y-36,'#f2a28d');sound(100,.13,'sawtooth',.02);
+  if(state.hp<=0){const lost=die(state);phase='dead';defeatBodyAge=0;clearActions();restoreBattleSkills();skillEffects.length=0;const text=Object.entries(lost).map(([id,n])=>`${MATERIALS[id].name} ×${n}`).join('、');$('#death-text').textContent=(text?'遗失了 '+text+'。':'这次没有遗失材料。')+' 装备和仓库全部保留。';$('#death-cover').hidden=false;persist();}renderUI();}
+function harvest(n){if(mode!=='exploration'||n.respawn>0)return;
+  playPlayerMotion(n.type==='wood'?'axe':'mine',.34,playerFacing(Math.atan2(n.y-player.y,n.x-player.x)));
+  n.hits++;sparks(n.x,n.y-10,n.type==='wood'?'#c2a274':'#c0c9cf',6);sound(n.type==='wood'?185:560,.07,'square',.012);float(n.type==='wood'?'砍伐':'采掘',n.x,n.y-28,'#d2c89b');
   if(n.hits>=n.max){n.hits=0;n.respawn=55;const items=n.type==='wood'?{wood:4}:n.type==='iron'?{iron:3}:n.type==='crystal'?{crystal:2,iron:1}:{[n.type]:3};loot.push({x:n.x,y:n.y,items,age:0,key:n.type});}}
-function heal(){if(phase!=='playing'||modal)return;if(!state.potions){toast('药水用完了，可以向铁匠购买',true);return;}if(state.hp>=stats(state).maxHp){toast('目前生命充足');return;}state.potions--;state.hp=Math.min(stats(state).maxHp,state.hp+55);float('+55',player.x,player.y-35,'#a9d49b');sound(700,.18,'sine');persist();renderUI();}
+function heal(){if(phase!=='playing'||modal)return;if(!state.potions){toast('药水用完了，可以向铁匠购买',true);return;}if(state.hp>=stats(state).maxHp){toast('目前生命充足');return;}state.potions--;playPlayerMotion('drink',.55);state.hp=Math.min(stats(state).maxHp,state.hp+55);float('+55',player.x,player.y-35,'#a9d49b');sound(700,.18,'sine');persist();renderUI();}
 function returnTown(){if(phase!=='playing'||modal)return;if(safeZone()){rest();return;}if(time-player.lastHurt<3){toast(mode==='battle'?'受伤后需要等待片刻才能撤离':'稍后再返回原野入口',true);return;}channel=1.8;toast(mode==='battle'?'正在撤离战斗，移动或受伤会中断':'正在返回原野入口，移动会中断');}
 function rest(){state.hp=stats(state).maxHp;player.stamina=100;toast('在小镇休整，生命与体力已恢复');persist();renderUI();}
 function nearby(){if(mode!=='exploration')return null;if(TOWN){const shop=world.shops.find(s=>distance(player,s)<85);if(shop)return {kind:'shop',shop,text:shop.name+' · 交互'};if(distance(player,world.exit)<100)return {kind:'town-exit',text:'前往溪畔原野 · 交互'};return null;}if(!TOWN&&distance(player,gateway)<95)return {kind:'town-entry',text:'世界旅行 / 返回溪谷镇 · 交互'};if(distance(player,smith)<78)return {kind:'smith',text:'铁匠老铎 · 打造与补给'};let best=null;
@@ -350,7 +353,7 @@ function update(dt){time+=dt;state.playtime+=dt;player.invuln=Math.max(0,player.
     if(target){const a=Math.atan2(target.y-e.y,target.x-e.x);e.angle=a;const speed=e.speed*(chase?1:.48);e.moving=move(e,Math.cos(a)*speed*dt,Math.sin(a)*speed*dt)>0.1;}}
   // Check again after enemy movement, at each released effect's fixed world position.
   for(const f of skillEffects)if(f.attack){hitSwordEffect(f);if(phase!=='playing')return;}
-  for(let i=loot.length-1;i>=0;i--){const item=loot[i];item.age+=dt;const d=distance(item,player);if(d<105){let a=Math.atan2(player.y-item.y,player.x-item.x);item.x+=Math.cos(a)*Math.min(d,260*dt);item.y+=Math.sin(a)*Math.min(d,260*dt);}if(d<20){addMaterials(state,item.items);lastPickup=Object.entries(item.items).map(([id,n])=>`${MATERIALS[id].name} +${n}`).join('  ');toast(lastPickup);loot.splice(i,1);sound(680,.06,'sine');questCheck();persist();renderUI();}}
+  for(let i=loot.length-1;i>=0;i--){const item=loot[i];item.age+=dt;const d=distance(item,player);if(d<105){let a=Math.atan2(player.y-item.y,player.x-item.x);item.x+=Math.cos(a)*Math.min(d,260*dt);item.y+=Math.sin(a)*Math.min(d,260*dt);}if(d<20){playPlayerMotion('pickup',.34);addMaterials(state,item.items);lastPickup=Object.entries(item.items).map(([id,n])=>`${MATERIALS[id].name} +${n}`).join('  ');toast(lastPickup);loot.splice(i,1);sound(680,.06,'sine');questCheck();persist();renderUI();}}
   for(let i=numbers.length-1;i>=0;i--){numbers[i].life-=dt;numbers[i].y-=22*dt;if(numbers[i].life<=0)numbers.splice(i,1);}
   for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.life-=dt;p.x+=p.dx*dt;p.y+=p.dy*dt;p.dy+=150*dt;if(p.life<=0)particles.splice(i,1);}
   screenShake=Math.max(0,screenShake-dt*25);accSave+=dt;uiClock+=dt;if(accSave>8){accSave=0;persist();}if(uiClock>.12){uiClock=0;renderHUD();}
@@ -393,14 +396,43 @@ function drawEnemy(e){
   const a=e.attackAnim||e.windup?'attack':e.moving?'walk':'idle',dir=Math.abs(Math.cos(e.angle))>.65?'right':Math.sin(e.angle)>0?'down':'up';const clip=e.type==='skeleton'?`skeleton.${a}.${dir}`:e.type==='boar'?'boar.walk':`${e.type}.${a}`;
   if(MEADOW)drawMeadowActor(e.type,e.x,e.y,Math.cos(e.angle)<-.65,e.moving||e.type==='slime');else if(!drawMineCreature(e))drawClip(clip,e.x,e.y,e.scale,Math.cos(e.angle)<-.65);
 }
-function drawPlayer(){ctx.save();ctx.translate(player.x,player.y);ctx.scale(ACTOR_SCALE.player,ACTOR_SCALE.player);ctx.translate(-player.x,-player.y);shadow(player.x,player.y,10);const pose=player.attack>0?'attack':player.moving||player.roll>0?'walk':'idle';const flip=player.dir==='right'&&Math.cos(player.aim)<0;
-  if(pose==='attack'){
-    const frames=world.clips[`player.attack.${player.dir}`],progress=swordCast?clamp(swordCast.age/SWORD_SKILLS[swordCast.id].duration,0,1):clamp(1-player.attack/.24,0,1);
-    drawFrame(frames[Math.min(frames.length-1,Math.floor(progress*frames.length))],player.x,player.y,1.65,flip);
-  }else drawClip(`player.${pose}.${player.dir}`,player.x,player.y,1.65,flip,player.roll>0?18:pose==='idle'?2:9);
+function playerFacing(angle){
+  const horizontal=Math.cos(angle);
+  return Math.abs(horizontal)>.65?(horizontal<0?'left':'right'):Math.sin(angle)>0?'down':'up';
+}
+function playPlayerMotion(kind,duration,direction){
+  playerMotion={kind,duration,direction,start:time};
+}
+function playerMotionFrame(){
+  const clips=world.clips,direction=playerFacing(player.aim);
+  const at=(action,progress)=>action[Math.min(action.length-1,Math.max(0,Math.floor(progress*action.length)))];
+  if(phase==='dead')return clips['player.dead'][defeatBodyAge<.09?0:1];
+  if(swordCast)return swordCastFrame(clips,direction,swordCast.id,swordCast.age);
+  if(player.roll>0)return at(clips[`player.roll.${playerFacing(player.rollAngle)}`],1-player.roll/.22);
+  if(player.attack>0){
+    const weapon=state.equipped.weapon==='stonehammer'?'hammer':'attack';
+    const age=.24-player.attack,heavy=swing?.heavy;
+    const frame=age<(heavy?.074:.055)?0:age<(heavy?.15:.118)?1:age<(heavy?.20:.183)?2:3;
+    return clips[`player.${weapon}.${direction}`][frame];
+  }
+  if(playerMotion){
+    const {kind,duration,start,direction:motionDirection}=playerMotion;
+    if(time-start<duration){
+      const clip=clips[`player.${kind}.${motionDirection||direction}`]||clips[`player.${kind}`];
+      return at(clip,(time-start)/duration);
+    }
+    playerMotion=null;
+  }
+  const frames=clips[`player.${player.moving?'walk':'idle'}.${direction}`];
+  return frames[Math.floor(time*(player.moving?9:5))%frames.length];
+}
+function drawPlayer(){
+  ctx.save();ctx.translate(player.x,player.y);ctx.scale(ACTOR_SCALE.player,ACTOR_SCALE.player);ctx.translate(-player.x,-player.y);
+  shadow(player.x,player.y,10);
+  drawFrame(playerMotionFrame(),player.x,player.y,1.65);
   if(state.equipped.armor==='leather'){ctx.fillStyle='#8b6341';ctx.fillRect(player.x-10,player.y-21,4,6);ctx.fillRect(player.x+6,player.y-21,4,6);ctx.fillStyle='#dcc293';ctx.fillRect(player.x-9,player.y-22,3,2);ctx.fillRect(player.x+6,player.y-22,3,2);}
   if(state.equipped.charm==='bonecharm'){ctx.fillStyle=player.charmBuff>0?'#f0df97':'#bda8de';ctx.fillRect(player.x-1,player.y-17,3,3);}
-  if(player.attack<=0&&state.equipped.weapon!=='starter'){const w=state.equipped.weapon;ctx.save();ctx.translate(player.x+Math.cos(player.aim)*10,player.y-12+Math.sin(player.aim)*5);ctx.rotate(player.aim+Math.PI/2);ctx.fillStyle=w==='coreblade'?'#edc970':w==='fangblade'?'#e5d8b8':'#a9bdc4';ctx.fillRect(-1,-12,3,11);ctx.fillStyle='#b38853';ctx.fillRect(-4,-2,9,2);ctx.fillRect(-1,0,3,4);if(w==='stonehammer'){ctx.fillStyle='#86999b';ctx.fillRect(-5,-14,11,7);}ctx.restore();}
+  if(player.attack<=0&&player.roll<=0&&!playerMotion&&phase!=='dead'&&state.equipped.weapon!=='starter'){const w=state.equipped.weapon;ctx.save();ctx.translate(player.x+Math.cos(player.aim)*10,player.y-12+Math.sin(player.aim)*5);ctx.rotate(player.aim+Math.PI/2);ctx.fillStyle=w==='coreblade'?'#edc970':w==='fangblade'?'#e5d8b8':'#a9bdc4';ctx.fillRect(-1,-12,3,11);ctx.fillStyle='#b38853';ctx.fillRect(-4,-2,9,2);ctx.fillRect(-1,0,3,4);if(w==='stonehammer'){ctx.fillStyle='#86999b';ctx.fillRect(-5,-14,11,7);}ctx.restore();}
   if(player.invuln>0){ctx.strokeStyle=player.roll>0?'#e4d6a1':'#e8c4b7';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(player.x,player.y-16,15,22,0,0,Math.PI*2);ctx.stroke();}
   if(swing){let t=1-swing.time/.24;ctx.save();ctx.translate(player.x,player.y-10);ctx.rotate(swing.angle);ctx.strokeStyle=swing.heavy?'#ecc77e':'#ebefd7';ctx.lineWidth=swing.heavy?5:3;ctx.globalAlpha=1-t;ctx.beginPath();ctx.arc(0,0,swing.range*.85,-1.3+t*.5,1.3+t*.5);ctx.stroke();ctx.restore();}
 ctx.restore();}
@@ -668,6 +700,9 @@ async function load(){try{
   if(arrivingFrom){const url=new URL(location.href);url.searchParams.delete('from');history.replaceState(history.state,'',url.href);}requestAnimationFrame(loop);
   probe?.stage('scene-ready');if(TOWN||MEADOW||MINE)prefetch=scheduleIdlePrefetch({resources,cacheBytes:cachedPixelBytes,load:()=>ensureArena('forest')});
 }catch(error){if(pageDisposed)return;console.error(error);$('#loading-text').textContent=error.message;$('#reload-btn').hidden=false;$('#reload-btn').onclick=()=>location.reload();}}
-function loop(t){if(pageDisposed)return;const frameStart=probe?performance.now():0;if(document.hidden){last=t;requestAnimationFrame(loop);return;}const dt=Math.min(.035,(t-last)/1000||.016);last=t;if(!orientationBlocked){if(phase==='entering')updateEntering(dt);else if(phase==='playing'&&(!modal||(modal==='map'&&mode==='exploration')))update(dt);}if(modal==='map'&&mode==='exploration'){const dot=$('.map-full .map-point');if(dot){dot.style.left=player.x/world.width*100+'%';dot.style.top=player.y/world.height*100+'%';}}render();if(probe)probe.frame(t,performance.now()-frameStart);requestAnimationFrame(loop);}
+function loop(t){if(pageDisposed)return;const frameStart=probe?performance.now():0;if(document.hidden){last=t;requestAnimationFrame(loop);return;}const dt=Math.min(.035,(t-last)/1000||.016);last=t;if(!orientationBlocked){if(phase==='entering')updateEntering(dt);else if(phase==='playing'&&(!modal||(modal==='map'&&mode==='exploration')))update(dt);else if(phase==='dead'&&defeatBodyAge<.09){
+  defeatBodyAge+=dt;
+  if(defeatBodyAge>=.09)sceneDirty=true;
+}}if(modal==='map'&&mode==='exploration'){const dot=$('.map-full .map-point');if(dot){dot.style.left=player.x/world.width*100+'%';dot.style.top=player.y/world.height*100+'%';}}render();if(probe)probe.frame(t,performance.now()-frameStart);requestAnimationFrame(loop);}
 mountPanelFit();
 load();
